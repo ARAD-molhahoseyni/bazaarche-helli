@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> 10 بازارچه علامه‌حلّی</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Tahoma, Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 500px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.header.green {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.header.orange {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.content {
+    padding: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+    color: white;
+}
+
+.btn-outline {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.info-box {
+    background: #e3f2fd;
+    border-right: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.warning-box {
+    background: #fff3e0;
+    border-right: 4px solid #ff9800;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.balance-card {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+    margin: 20px;
+    border-radius: 15px;
+}
+
+.balance-amount {
+    font-size: 42px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.balance-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.user-info {
+    background: rgba(255,255,255,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 20px;
+    color: white;
+}
+
+.user-info div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.stat-box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.transaction-list {
+    margin-top: 20px;
+}
+
+.transaction-item {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-right: 4px solid #667eea;
+}
+
+.transaction-item.charge {
+    border-right-color: #4caf50;
+}
+
+.transaction-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.transaction-amount {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.transaction-amount.positive {
+    color: #4caf50;
+}
+
+.transaction-amount.negative {
+    color: #f44336;
+}
+
+.transaction-details {
+    font-size: 12px;
+    color: #666;
+}
+
+.quick-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.quick-btn {
+    background: #e3f2fd;
+    border: 2px solid #2196F3;
+    color: #1565C0;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.quick-btn:hover {
+    background: #2196F3;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+</style>
+</head>
+<body>
+
+<!-- صفحه خوش‌آمدگویی -->
+<div id="welcomePage" class="container">
+    <div class="header">
+        <h1>🎓  بازارچه علامه‌حلّی ده</h1>
+        <p>سیستم پرداخت دیجیتال</p>
+    </div>
+    <div class="content">
+        <div class="info-box">
+            👋 خوش آمدید! لطفاً یکی از گزینه‌ها را انتخاب کنید:
+        </div>
+        <button class="btn btn-primary" onclick="goToRegister()">
+            ✨ ثبت‌نام (کاربر جدید)
+        </button>
+        <button class="btn btn-secondary" onclick="goToLogin()">
+            🔑 ورود (قبلاً ثبت‌نام کرده‌ام)
+        </button>
+        <button class="btn btn-outline" onclick="goToAdmin()">
+            👨‍💼 پنل مدیریت
+        </button>
+    </div>
+</div>
+
+<!-- صفحه ثبت‌نام -->
+<div id="registerPage" class="container hidden">
+    <div class="header">
+        <h1>📝 ثبت‌نام</h1>
+        <p>کاربر جدید</p>
+    </div>
+    <div class="content">
+        <div class="warning-box">
+            ⚠️ موجودی اولیه شما <strong>۰ تومان</strong> است. برای دریافت اعتبار به غرفه شارژ مراجعه کنید.
+        </div>
+        
+        <div class="form-group">
+            <label>👤 نام و نام خانوادگی</label>
+            <input type="text" id="regName" placeholder="مثال: علی احمدی">
+        </div>
+        
+        <div class="form-group">
+            <label>🆔 کد دانش‌آموزی</label>
+            <input type="text" id="regCode" placeholder="مثال: 12345">
+        </div>
+        
+        <button class="btn btn-primary" onclick="doRegister()">
+            ✨ ثبت‌نام
+        </button>
+        
+        <button class="btn btn-outline" onclick="goToWelcome()">
+            ← بازگشت
+        </button>
+    </div>
+</div>
+
+<!-- صفحه ورود -->
+<div id="loginPage" class="container hidden">
+    <div class="header green">
+        <h1>🔐 ورود به سیستم</h1>
+        <p>کیف پول دیجیتال</p>
+    </div>
+    <div class="content">
+        <div class="form-group">
+            <label>👤 نام و نام خانوادگی</label>
+            <input type="text" id="loginName" placeholder="مثال: علی احمدی">
+        </div>
+        
+        <div class="form-group">
+            <label>🆔 کد دانش‌آموزی</label>
+            <input type="text" id="loginCode" placeholder="مثال: 12345">
+        </div>
+        
+        <button class="btn btn-secondary" onclick="doLogin()">
+            🚀 ورود
+        </button>
+        
+        <button class="btn btn-outline" onclick="goToWelcome()">
+            ← بازگشت
+        </button>
+    </div>
+</div>
+
+<!-- صفحه کیف پول -->
+<div id="walletPage" class="container hidden">
+    <div class="header green">
+        <h1>💼 کیف پول دیجیتال</h1>
+        <p>بازارچه علامه‌حلّی</p>
+        <div class="user-info">
+            <div><span>👤 نام:</span><strong id="userName"></strong></div>
+            <div><span>🆔 کد:</span><strong id="userCode"></strong></div>
+        </div>
+    </div>
+    
+    <div class="balance-card">
+        <div class="balance-amount" id="userBalance">0</div>
+        <div class="balance-label">تومان موجودی</div>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value" id="statCharges">0</div>
+            <div class="stat-label">شارژ</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="statPayments">0</div>
+            <div class="stat-label">خرید</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="statSpent">0</div>
+            <div class="stat-label">هزینه</div>
+        </div>
+    </div>
+    
+    <div class="content">
+        <h3 style="margin-bottom: 15px;">💸 پرداخت سریع</h3>
+        
+        <div class="quick-amounts">
+            <div class="quick-btn" onclick="setQuickAmount(1000)">۱,۰۰۰</div>
+            <div class="quick-btn" onclick="setQuickAmount(2000)">۲,۰۰۰</div>
+            <div class="quick-btn" onclick="setQuickAmount(5000)">۵,۰۰۰</div>
+            <div class="quick-btn" onclick="setQuickAmount(10000)">۱۰,۰۰۰</div>
+        </div>
+        
+        <div class="form-group">
+            <label>🏪 انتخاب غرفه</label>
+            <select id="standSelect">
+                <option value="">-- انتخاب کنید --</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>💰 مبلغ (تومان)</label>
+            <input type="number" id="payAmount" placeholder="مبلغ را وارد کنید" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label>📝 توضیحات (اختیاری)</label>
+            <input type="text" id="payDesc" placeholder="توضیح خرید...">
+        </div>
+        
+        <button class="btn btn-primary" onclick="doPayment()">
+            ✅ پرداخت و خرید
+        </button>
+        
+        <div class="transaction-list">
+            <h3 style="margin-bottom: 15px;">📋 تاریخچه تراکنش‌ها</h3>
+            <div id="transactionsList"></div>
+        </div>
+        
+        <button class="btn btn-danger" onclick="doLogout()">
+            🚪 خروج از سیستم
+        </button>
+    </div>
+</div>
+
+<!-- صفحه ورود ادمین -->
+<div id="adminLoginPage" class="container hidden">
+    <div class="header orange">
+        <h1>👨‍💼 پنل مدیریت</h1>
+        <p>ورود به سیستم مدیریت</p>
+    </div>
+    <div class="content">
+        <div class="warning-box">
+            🔐 این بخش فقط برای مدیر سیستم است.
+        </div>
+        
+        <div class="form-group">
+            <label>🔑 رمز عبور مدیریت</label>
+            <input type="password" id="adminPassword" placeholder="رمز را وارد کنید">
+        </div>
+        
+        <button class="btn btn-primary" onclick="doAdminLogin()">
+            🚀 ورود به پنل
+        </button>
+        
+        <button class="btn btn-outline" onclick="goToWelcome()">
+            ← بازگشت
+        </button>
+        
+        <div class="info-box" style="margin-top: 20px;">
+            💡 رمز پیش‌فرض: <code></code>
+        </div>
+    </div>
+</div>
+
+<!-- پنل مدیریت -->
+<div id="adminDashboard" class="container hidden">
+    <div class="header orange">
+        <h1>📊 داشبورد مدیریت</h1>
+        <p>بازارچه علامه‌حلّی</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value" id="adminStudents">0</div>
+            <div class="stat-label">👥 دانش‌آموزان</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="adminStands">0</div>
+            <div class="stat-label">🏪 غرفه‌ها</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="adminMoney">0</div>
+            <div class="stat-label">💰 کل شارژ</div>
+        </div>
+    </div>
+    
+    <div class="content">
+        <h3 style="margin-bottom: 15px;">⚡ شارژ حساب دانش‌آموز</h3>
+        
+        <div class="form-group">
+            <label>👤 انتخاب دانش‌آموز</label>
+            <select id="chargeStudentSelect">
+                <option value="">-- انتخاب کنید --</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>💵 مبلغ شارژ (تومان)</label>
+            <input type="number" id="chargeAmount" placeholder="مبلغ شارژ" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label>💸 مبلغ نقدی دریافتی (تومان)</label>
+            <input type="number" id="cashReceived" placeholder="مبلغ نقدی" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label>📝 توضیحات</label>
+            <input type="text" id="chargeDesc" placeholder="توضیحات شارژ...">
+        </div>
+        
+        <button class="btn btn-primary" onclick="doCharge()">
+            ⚡ شارژ حساب
+        </button>
+        
+        <button class="btn btn-secondary" onclick="showAddStand()">
+            ➕ افزودن غرفه جدید
+        </button>
+        
+        <button class="btn btn-outline" onclick="downloadData()">
+            💾 دانلود بک‌آپ
+        </button>
+        
+        <button class="btn btn-danger" onclick="resetAll()">
+            🗑️ ریست کامل سیستم
+        </button>
+        
+        <div class="transaction-list">
+            <h3 style="margin-bottom: 15px;">📋 تاریخچه شارژها</h3>
+            <div id="chargeHistoryList"></div>
+        </div>
+        
+        <button class="btn btn-outline" onclick="doAdminLogout()">
+            🚪 خروج از پنل
+        </button>
+    </div>
+</div>
+
+<script>
+// متغیرهای اصلی
+let currentUser = null;
+const ADMIN_PASS = 'adBazaar@1404#Helli10';
+
+// مدیریت صفحات
+function hideAll() {
+    document.querySelectorAll('.container').forEach(el => {
+        el.classList.add('hidden');
+    });
+}
+
+function showPage(pageId) {
+    hideAll();
+    document.getElementById(pageId).classList.remove('hidden');
+}
+
+// صفحه خوش‌آمدگویی
+function goToWelcome() {
+    showPage('welcomePage');
+}
+
+function goToRegister() {
+    showPage('registerPage');
+}
+
+function goToLogin() {
+    showPage('loginPage');
+}
+
+function goToAdmin() {
+    showPage('adminLoginPage');
+}
+
+// ثبت‌نام
+function doRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const code = document.getElementById('regCode').value.trim();
+    
+    if (!name || !code) {
+        alert('❌ لطفاً همه فیلدها را پر کنید');
+        return;
+    }
+    
+    if (code.length < 3) {
+        alert('❌ کد دانش‌آموزی باید حداقل ۳ رقم باشد');
+        return;
+    }
+    
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    
+    if (students.find(s => s.code === code)) {
+        alert('❌ این کد قبلاً ثبت شده است');
+        return;
+    }
+    
+    const newStudent = {
+        name: name,
+        code: code,
+        balance: 0,
+        createdAt: new Date().toISOString()
+    };
+    
+    students.push(newStudent);
+    localStorage.setItem('students', JSON.stringify(students));
+    
+    alert(`✅ ثبت‌نام موفق!\n\nخوش آمدید ${name}\nکد شما: ${code}\n\nموجودی شما ۰ تومان است.`);
+    
+    currentUser = newStudent;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    document.getElementById('regName').value = '';
+    document.getElementById('regCode').value = '';
+    
+    loadWallet();
+    showPage('walletPage');
+}
+
+// ورود
+function doLogin() {
+    const name = document.getElementById('loginName').value.trim();
+    const code = document.getElementById('loginCode').value.trim();
+    
+    if (!name || !code) {
+        alert('❌ لطفاً همه فیلدها را پر کنید');
+        return;
+    }
+    
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    let student = students.find(s => s.code === code && s.name === name);
+    
+    if (!student) {
+        alert('❌ نام یا کد اشتباه است');
+        return;
+    }
+    
+    currentUser = student;
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginCode').value = '';
+    
+    loadWallet();
+    showPage('walletPage');
+}
+
+// خروج
+function doLogout() {
+    if (confirm('آیا می‌خواهید خارج شوید؟')) {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        goToWelcome();
+    }
+}
+
+// کیف پول
+function loadWallet() {
+    if (!currentUser) {
+        goToWelcome();
+        return;
+    }
+    
+    // بروزرسانی از localStorage
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    let updated = students.find(s => s.code === currentUser.code);
+    if (updated) {
+        currentUser = updated;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+    
+    document.getElementById('userName').textContent = currentUser.name;
+    document.getElementById('userCode').textContent = currentUser.code;
+    document.getElementById('userBalance').textContent = currentUser.balance.toLocaleString('fa-IR');
+    
+    loadWalletStats();
+    loadStandsList();
+    loadUserTransactions();
+}
+
+function loadWalletStats() {
+    const charges = JSON.parse(localStorage.getItem('chargeHistory') || '[]');
+    const payments = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
+    
+    const myCharges = charges.filter(c => c.studentCode === currentUser.code);
+    const myPayments = payments.filter(p => p.studentCode === currentUser.code);
+    
+    const totalSpent = myPayments.reduce((sum, p) => sum + p.amount, 0);
+    
+    document.getElementById('statCharges').textContent = myCharges.length;
+    document.getElementById('statPayments').textContent = myPayments.length;
+    document.getElementById('statSpent').textContent = totalSpent.toLocaleString('fa-IR');
+}
+
+function loadStandsList() {
+    const stands = JSON.parse(localStorage.getItem('stands') || '[]');
+    const select = document.getElementById('standSelect');
+    
+    select.innerHTML = '<option value="">-- انتخاب کنید --</option>';
+    
+    stands.forEach(stand => {
+        const option = document.createElement('option');
+        option.value = stand.code;
+        option.textContent = `${stand.name} (${stand.code})`;
+        select.appendChild(option);
+    });
+}
+
+function loadUserTransactions() {
+    const charges = JSON.parse(localStorage.getItem('chargeHistory') || '[]');
+    const payments = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
+    
+    const myCharges = charges.filter(c => c.studentCode === currentUser.code).map(c => ({
+        ...c, type: 'charge'
+    }));
+    
+    const myPayments = payments.filter(p => p.studentCode === currentUser.code).map(p => ({
+        ...p, type: 'payment'
+    }));
+    
+    const all = [...myCharges, ...myPayments]
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 20);
+    
+    const container = document.getElementById('transactionsList');
+    
+    if (all.length === 0) {
+        container.innerHTML = '<div class="empty-state">📭 هنوز تراکنشی ثبت نشده است</div>';
+        return;
+    }
+    
+    container.innerHTML = all.map(t => {
+        const isCharge = t.type === 'charge';
+        const sign = isCharge ? '+' : '-';
+        const cls = isCharge ? 'charge' : '';
+        const amtCls = isCharge ? 'positive' : 'negative';
+        const label = isCharge ? 'شارژ توسط ادمین' : `خرید از ${t.standName || ''}`;
+        
+        return `
+            <div class="transaction-item ${cls}">
+                <div class="transaction-header">
+                    <div>${label}</div>
+                    <div class="transaction-amount ${amtCls}">${sign}${t.amount.toLocaleString('fa-IR')}</div>
+                </div>
+                <div class="transaction-details">
+                    ${t.description || '—'} • ${new Date(t.timestamp).toLocaleString('fa-IR')}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function setQuickAmount(amount) {
+    document.getElementById('payAmount').value = amount;
+}
+
+function doPayment() {
+    const standCode = document.getElementById('standSelect').value;
+    const amount = parseInt(document.getElementById('payAmount').value);
+    const description = document.getElementById('payDesc').value.trim();
+    
+    if (!standCode) {
+        alert('❌ لطفاً غرفه را انتخاب کنید');
+        return;
+    }
+    
+    if (!amount || amount <= 0) {
+        alert('❌ مبلغ معتبر نیست');
+        return;
+    }
+    
+    if (amount > currentUser.balance) {
+        alert(`❌ موجودی کافی نیست!\nموجودی شما: ${currentUser.balance.toLocaleString('fa-IR')} تومان`);
+        return;
+    }
+    
+    const stands = JSON.parse(localStorage.getItem('stands') || '[]');
+    const stand = stands.find(s => s.code === standCode);
+    
+    if (!stand) {
+        alert('❌ غرفه یافت نشد');
+        return;
+    }
+    
+    // کسر موجودی
+    currentUser.balance -= amount;
+    
+    // ذخیره کاربر
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    students = students.map(s => s.code === currentUser.code ? currentUser : s);
+    localStorage.setItem('students', JSON.stringify(students));
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    // ثبت پرداخت
+    let payments = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
+    payments.push({
+        studentName: currentUser.name,
+        studentCode: currentUser.code,
+        standName: stand.name,
+        standCode: stand.code,
+        amount: amount,
+        description: description || 'خرید',
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('paymentHistory', JSON.stringify(payments));
+    
+    // پاک کردن فرم
+    document.getElementById('standSelect').value = '';
+    document.getElementById('payAmount').value = '';
+    document.getElementById('payDesc').value = '';
+    
+    alert(`✅ پرداخت موفق!\n${amount.toLocaleString('fa-IR')} تومان به "${stand.name}" پرداخت شد.`);
+    
+    loadWallet();
+}
+
+// ادمین - ورود
+function doAdminLogin() {
+    const pass = document.getElementById('adminPassword').value;
+    
+    if (pass === ADMIN_PASS) {
+        document.getElementById('adminPassword').value = '';
+        loadAdminDashboard();
+        showPage('adminDashboard');
+    } else {
+        alert('❌ رمز عبور اشتباه است');
+    }
+}
+
+function doAdminLogout() {
+    if (confirm('خروج از پنل مدیریت؟')) {
+        goToWelcome();
+    }
+}
+
+// ادمین - داشبورد
+function loadAdminDashboard() {
+    const students = JSON.parse(localStorage.getItem('students') || '[]');
+    const stands = JSON.parse(localStorage.getItem('stands') || '[]');
+    const charges = JSON.parse(localStorage.getItem('chargeHistory') || '[]');
+    
+    const totalMoney = charges.reduce((sum, c) => sum + c.amount, 0);
+    
+    document.getElementById('adminStudents').textContent = students.length;
+    document.getElementById('adminStands').textContent = stands.length;
+    document.getElementById('adminMoney').textContent = totalMoney.toLocaleString('fa-IR');
+    
+    // لیست دانش‌آموزان
+    const select = document.getElementById('chargeStudentSelect');
+    select.innerHTML = '<option value="">-- انتخاب کنید --</option>';
+    
+    students.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student.code;
+        option.textContent = `${student.name} (${student.code}) - ${student.balance.toLocaleString('fa-IR')} تومان`;
+        select.appendChild(option);
+    });
+    
+    // تاریخچه شارژ
+    loadChargeHistory();
+}
+
+function loadChargeHistory() {
+    const charges = JSON.parse(localStorage.getItem('chargeHistory') || '[]');
+    const container = document.getElementById('chargeHistoryList');
+    
+    if (charges.length === 0) {
+        container.innerHTML = '<div class="empty-state">📭 هنوز شارژی ثبت نشده است</div>';
+        return;
+    }
+    
+    const sorted = charges.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 20);
+    
+    container.innerHTML = sorted.map(c => `
+        <div class="transaction-item charge">
+            <div class="transaction-header">
+                <div>${c.studentName} (${c.studentCode})</div>
+                <div class="transaction-amount positive">+${c.amount.toLocaleString('fa-IR')}</div>
+            </div>
+            <div class="transaction-details">
+                💵 نقدی: ${c.cashReceived.toLocaleString('fa-IR')} • ${c.description || '—'} • ${new Date(c.timestamp).toLocaleString('fa-IR')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function doCharge() {
+    const studentCode = document.getElementById('chargeStudentSelect').value;
+    const amount = parseInt(document.getElementById('chargeAmount').value);
+    const cash = parseInt(document.getElementById('cashReceived').value);
+    const description = document.getElementById('chargeDesc').value.trim();
+    
+    if (!studentCode) {
+        alert('❌ لطفاً دانش‌آموز را انتخاب کنید');
+        return;
+    }
+    
+    if (!amount || amount <= 0) {
+        alert('❌ مبلغ شارژ معتبر نیست');
+        return;
+    }
+    
+    if (!cash || cash < 0) {
+        alert('❌ مبلغ نقدی معتبر نیست');
+        return;
+    }
+    
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    let student = students.find(s => s.code === studentCode);
+    
+    if (!student) {
+        alert('❌ دانش‌آموز یافت نشد');
+        return;
+    }
+    
+    // افزایش موجودی
+    student.balance += amount;
+    
+    students = students.map(s => s.code === studentCode ? student : s);
+    localStorage.setItem('students', JSON.stringify(students));
+    
+    // ثبت شارژ
+    let charges = JSON.parse(localStorage.getItem('chargeHistory') || '[]');
+    charges.push({
+        studentName: student.name,
+        studentCode: student.code,
+        amount: amount,
+        cashReceived: cash,
+        description: description || 'شارژ حساب',
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('chargeHistory', JSON.stringify(charges));
+    
+    // پاک کردن فرم
+    document.getElementById('chargeStudentSelect').value = '';
+    document.getElementById('chargeAmount').value = '';
+    document.getElementById('cashReceived').value = '';
+    document.getElementById('chargeDesc').value = '';
+    
+    alert(`✅ شارژ موفق!\n${amount.toLocaleString('fa-IR')} تومان به حساب "${student.name}" اضافه شد.`);
+    
+    loadAdminDashboard();
+}
+
+function showAddStand() {
+    const name = prompt('نام غرفه:');
+    if (!name) return;
+    
+    const code = prompt('کد غرفه:');
+    if (!code) return;
+    
+    let stands = JSON.parse(localStorage.getItem('stands') || '[]');
+    
+    if (stands.find(s => s.code === code)) {
+        alert('❌ این کد قبلاً ثبت شده است');
+        return;
+    }
+    
+    stands.push({ name, code });
+    localStorage.setItem('stands', JSON.stringify(stands));
+    
+    alert(`✅ غرفه "${name}" اضافه شد`);
+    loadAdminDashboard();
+}
+
+function downloadData() {
+    const data = {
+        students: JSON.parse(localStorage.getItem('students') || '[]'),
+        stands: JSON.parse(localStorage.getItem('stands') || '[]'),
+        chargeHistory: JSON.parse(localStorage.getItem('chargeHistory') || '[]'),
+        paymentHistory: JSON.parse(localStorage.getItem('paymentHistory') || '[]'),
+        exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    alert('✅ فایل بک‌آپ دانلود شد');
+}
+
+function resetAll() {
+    if (!confirm('⚠️ آیا مطمئنید؟ تمام داده‌ها حذف می‌شود!')) return;
+    if (!confirm('⚠️ آخرین هشدار! این عمل قابل بازگشت نیست.')) return;
+    
+    localStorage.clear();
+    alert('✅ سیستم ریست شد');
+    goToWelcome();
+}
+
+// شروع برنامه
+window.addEventListener('DOMContentLoaded', function() {
+    // بررسی کاربر قبلی
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        loadWallet();
+        showPage('walletPage');
+    } else {
+        showPage('welcomePage');
+    }
+    
+    // اضافه کردن غرفه‌های پیش‌فرض
+    if (!localStorage.getItem('stands')) {
+        localStorage.setItem('stands', JSON.stringify([
+            { name: 'غرفه غذا', code: 'FOOD1' },
+            { name: 'غرفه نوشیدنی', code: 'DRINK1' },
+            { name: 'غرفه بازی', code: 'GAME1' }
+        ]));
+    }
+});
+</script>
+
+</body>
+</html>
