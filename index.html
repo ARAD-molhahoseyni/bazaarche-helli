@@ -136,11 +136,19 @@
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
         }
 
+        .btn-stall {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
         .stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin: 20px 0;
+        }
+
+        .stats-three {
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .stat-card {
@@ -149,6 +157,18 @@
             padding: 20px;
             border-radius: 15px;
             text-align: center;
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%);
+        }
+
+        .stat-card.purple {
+            background: linear-gradient(135deg, #9C27B0 0%, #7b1fa2 100%);
         }
 
         .stat-value {
@@ -201,6 +221,10 @@
 
         .transaction.purchase {
             border-right-color: #ff6b6b;
+        }
+
+        .transaction.charge {
+            border-right-color: #4CAF50;
         }
 
         .transaction-header {
@@ -264,6 +288,16 @@
             color: white;
         }
 
+        .password-info {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #1976D2;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -274,6 +308,10 @@
             }
 
             .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-three {
                 grid-template-columns: 1fr;
             }
         }
@@ -292,6 +330,7 @@
         
         <button class="btn" onclick="showPage('registerPage')">✨ ثبت‌نام</button>
         <button class="btn btn-secondary" onclick="showPage('loginPage')">🔐 ورود</button>
+        <button class="btn btn-stall" onclick="showPage('stallLoginPage')">🏪 ورود غرفه‌دار</button>
         <button class="btn btn-success" onclick="showPage('adminPage')">👨‍💼 پنل مدیریت</button>
         <button class="btn btn-warning" onclick="syncData()">🔄 همگام‌سازی با سرور</button>
     </div>
@@ -338,6 +377,72 @@
         <button class="btn" onclick="loginStudent()">🚀 ورود</button>
     </div>
 
+    <!-- صفحه ورود غرفه‌دار -->
+    <div id="stallLoginPage" class="page">
+        <button class="btn back-btn" onclick="showPage('welcomePage')">← بازگشت</button>
+        <h1>ورود غرفه‌دار</h1>
+        <p class="subtitle">با کد غرفه و رمز عبور وارد شوید</p>
+        
+        <div class="password-info">
+            <strong>🔑 رمزهای پیش‌فرض:</strong><br>
+            غرفه غذا: <code>food123</code><br>
+            غرفه نوشیدنی: <code>drink123</code><br>
+            غرفه بازی: <code>game123</code>
+        </div>
+        
+        <div id="stallLoginMessage"></div>
+        
+        <div class="input-group">
+            <label>🏪 کد غرفه:</label>
+            <input type="text" id="stallCode" placeholder="مثال: FOOD1">
+        </div>
+        
+        <div class="input-group">
+            <label>🔑 رمز عبور:</label>
+            <input type="password" id="stallPassword" placeholder="رمز عبور غرفه">
+        </div>
+        
+        <button class="btn btn-stall" onclick="stallLogin()">🚀 ورود به داشبورد</button>
+    </div>
+
+    <!-- داشبورد غرفه‌دار -->
+    <div id="stallDashboard" class="page">
+        <button class="btn back-btn" onclick="stallLogout()">← خروج</button>
+        <h1>داشبورد غرفه‌دار</h1>
+        <p class="subtitle" id="stallInfo"></p>
+        
+        <div class="stats stats-three">
+            <div class="stat-card green">
+                <div class="stat-value" id="todaySales">0</div>
+                <div class="stat-label">فروش امروز</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-value" id="todayAmount">0</div>
+                <div class="stat-label">درآمد امروز (تومان)</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-value" id="totalSales">0</div>
+                <div class="stat-label">کل فروش</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalAmount">0</div>
+                <div class="stat-label">کل درآمد (تومان)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgSale">0</div>
+                <div class="stat-label">میانگین فروش (تومان)</div>
+            </div>
+        </div>
+        
+        <button class="btn btn-warning" onclick="refreshStallStats()">🔄 به‌روزرسانی آمار</button>
+        
+        <h3 style="margin: 30px 0 10px 0;">📋 آخرین خریدها</h3>
+        <div id="stallTransactions" class="transactions"></div>
+    </div>
+
     <!-- صفحه کیف پول -->
     <div id="walletPage" class="page">
         <button class="btn back-btn" onclick="logout()">← خروج</button>
@@ -346,239 +451,156 @@
         
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-value" id="balance">0</div>
+                <div class="stat-value" id="balance">0
+                                    </div>
                 <div class="stat-label">موجودی (تومان)</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalPurchases">0</div>
-                <div class="stat-label">تعداد خریدها</div>
+            <div class="stat-card green">
+                <div class="stat-value" id="totalSpent">0</div>
+                <div class="stat-label">کل خریدها</div>
             </div>
         </div>
         
-        <h3 style="margin: 20px 0 10px 0;">💳 پرداخت سریع</h3>
+        <h3>🛍 خرید سریع</h3>
         <div class="quick-pay">
-            <button class="quick-btn" onclick="quickPay(1000)">۱,۰۰۰ تومان</button>
-            <button class="quick-btn" onclick="quickPay(2000)">۲,۰۰۰ تومان</button>
-            <button class="quick-btn" onclick="quickPay(5000)">۵,۰۰۰ تومان</button>
-            <button class="quick-btn" onclick="quickPay(10000)">۱۰,۰۰۰ تومان</button>
+            <button class="quick-btn" onclick="buyItem('FOOD1',5000)">🍔 غذا (5000 تومان)</button>
+            <button class="quick-btn" onclick="buyItem('DRINK1',3000)">🥤 نوشیدنی (3000 تومان)</button>
         </div>
         
-        <div id="purchaseMessage"></div>
-        
-        <div class="input-group">
-            <label>💰 مبلغ (تومان):</label>
-            <input type="number" id="purchaseAmount" placeholder="مبلغ را وارد کنید">
-        </div>
-        
-        <div class="input-group">
-            <label>🏪 غرفه:</label>
-            <select id="purchaseStall">
-                <option value="">در حال بارگذاری...</option>
-            </select>
-        </div>
-        
-        <div class="input-group">
-            <label>📝 توضیحات (اختیاری):</label>
-            <textarea id="purchaseDesc" rows="2" placeholder="توضیحات خرید..."></textarea>
-        </div>
-        
-        <button class="btn" onclick="makePurchase()">✅ پرداخت و خرید</button>
-        
-        <h3 style="margin: 30px 0 10px 0;">📋 تاریخچه تراکنش‌ها</h3>
-        <div id="transactions" class="transactions"></div>
+        <h3>📜 آخرین تراکنش‌ها</h3>
+        <div id="walletTransactions" class="transactions"></div>
     </div>
 
-    <!-- صفحه مدیریت -->
+    <!-- پنل مدیریت -->
     <div id="adminPage" class="page">
-        <div id="adminLogin">
-            <button class="btn back-btn" onclick="showPage('welcomePage')">← بازگشت</button>
-            <h1>پنل مدیریت</h1>
-            <p class="subtitle">ورود به حساب مدیریت</p>
-            
-            <div id="adminLoginMessage"></div>
-            
-            <div class="input-group">
-                <label>🔑 رمز عبور:</label>
-                <input type="password" id="adminPassword" placeholder="رمز مدیریت را وارد کنید">
-            </div>
-            
-            <button class="btn" onclick="adminLogin()">🚀 ورود به پنل</button>
-        </div>
+        <button class="btn back-btn" onclick="showPage('welcomePage')">← بازگشت</button>
+        <h1>پنل مدیریت</h1>
+        <p class="subtitle">ورود مدیر برای کنترل کامل سامانه</p>
         
+        <div id="adminLoginSection">
+            <div class="input-group">
+                <label>رمز عبور مدیریت:</label>
+                <input type="password" id="adminPass" placeholder="رمز ادمین">
+            </div>
+            <button class="btn btn-success" onclick="adminLogin()">🚀 ورود</button>
+        </div>
+
         <div id="adminDashboard" style="display:none;">
-            <button class="btn back-btn" onclick="adminLogout()">← خروج از پنل</button>
-            <h1>داشبورد مدیریت</h1>
-            <p class="subtitle">مدیریت بازارچه علامه حلی ده</p>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalStudents">0</div>
-                    <div class="stat-label">دانش‌آموزان</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalStalls">0</div>
-                    <div class="stat-label">غرفه‌ها</div>
-                </div>
-            </div>
-            
-            <div id="adminMessage"></div>
-            
-            <h3 style="margin: 20px 0 10px 0;">⚡ شارژ حساب دانش‌آموز</h3>
+            <h3>🔋 شارژ کیف پول دانش‌آموز</h3>
             <div class="input-group">
-                <label>👤 دانش‌آموز:</label>
-                <select id="chargeStudent">
-                    <option value="">انتخاب دانش‌آموز...</option>
-                </select>
+                <label>کد دانش‌آموزی:</label>
+                <input type="text" id="chargeStudentId">
             </div>
-            
             <div class="input-group">
-                <label>💰 مبلغ شارژ (تومان):</label>
-                <input type="number" id="chargeAmount" placeholder="مبلغ شارژ">
+                <label>مبلغ (تومان):</label>
+                <input type="number" id="chargeAmount">
             </div>
+            <button class="btn btn-success" onclick="chargeWallet()">✅ ثبت و شارژ</button>
             
+            <h3 style="margin-top:30px;">➕ افزودن غرفه جدید</h3>
             <div class="input-group">
-                <label>💵 مبلغ نقدی دریافتی (تومان):</label>
-                <input type="number" id="chargeCash" placeholder="مبلغ نقدی">
+                <label>کد غرفه:</label>
+                <input type="text" id="stallCodeAdd">
             </div>
-            
-            <button class="btn" onclick="chargeStudent()">⚡ شارژ حساب</button>
-            
-            <h3 style="margin: 30px 0 10px 0;">➕ افزودن غرفه جدید</h3>
             <div class="input-group">
-                <label>🏪 نام غرفه:</label>
-                <input type="text" id="stallName" placeholder="مثال: غرفه کتاب">
+                <label>نام غرفه:</label>
+                <input type="text" id="stallNameAdd">
             </div>
+            <button class="btn btn-stall" onclick="addStall()">➕ افزودن غرفه</button>
             
-            <div class="input-group">
-                <label>🎫 کد غرفه:</label>
-                <input type="text" id="stallCode" placeholder="مثال: BOOK1">
-            </div>
-            
-            <button class="btn btn-success" onclick="addStall()">➕ افزودن غرفه</button>
-            
-            <h3 style="margin: 30px 0 10px 0;">📊 گزارشات</h3>
-            <div id="adminReports" class="transactions"></div>
-            
-            <button class="btn btn-danger" onclick="resetSystem()" style="margin-top: 30px;">🗑️ ریست کامل سیستم</button>
+            <button class="btn btn-warning" style="margin-top:30px" onclick="syncData()">🔄 همگام‌سازی با سرور</button>
         </div>
     </div>
 </div>
 
 <script>
-// ========== تنظیمات اصلی ==========
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTPmSoXHk4U6Z-GO8R91f_xWm6iL6hvWIVX8T3fhHzrhP6GJZYbmTyqEKxzl_WUmw9/exec'; // آدرس Apps Script که کپی کردید
-const ADMIN_PASS = 'adBazaar@1404#Helli10';
+// ⚙️ آدرس اسکریپت گوگل (باید توسط کاربر جایگزین شود)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygoBZasLhvwUhY0xTG3d-YOZ5nwB-tROzy0b2lg-2eX4N8R0pYesgaL5ne-37TuLc/exec";
+const ADMIN_PASS = "adBazaar@1404#Helli10";
 
 let currentUser = null;
-let allData = {
-    students: [],
-    charges: [],
-    purchases: [],
-    stalls: []
-};
+let currentStall = null;
 
-// ========== توابع کمکی ==========
+// 🧭 مدیریت صفحات
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
 }
 
-function showMessage(elementId, message, type = 'error') {
-    const el = document.getElementById(elementId);
-    el.className = type;
-    el.textContent = message;
-    setTimeout(() => el.textContent = '', 5000);
-}
-
-function formatNumber(num) {
-    return new Intl.NumberFormat('fa-IR').format(num);
-}
-
-// ========== API Calls ==========
-async function callAPI(action, params = {}) {
-    try {
-        const url = new URL(SCRIPT_URL);
-        url.searchParams.append('action', action);
-        Object.keys(params).forEach(key => {
-            url.searchParams.append(key, params[key]);
-        });
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('API Error:', error);
-        return { success: false, error: 'خطا در اتصال به سرور' };
-    }
-}
-
-// ========== راه‌اندازی اولیه ==========
-async function initSystem() {
-    const result = await callAPI('init');
-    if (result.success) {
-        await syncData();
-    }
-}
-
+// 🔄 دریافت داده اولیه از گوگل
 async function syncData() {
-    document.getElementById('syncStatus').textContent = 'در حال دریافت اطلاعات...';
-    
-    const result = await callAPI('getAll');
-    if (result.success) {
-        allData = result;
-        document.getElementById('syncStatus').className = 'success';
-        document.getElementById('syncStatus').textContent = '✅ اتصال برقرار است';
-        
-        updateAdminData();
-    } else {
-        document.getElementById('syncStatus').className = 'error';
-        document.getElementById('syncStatus').textContent = '❌ خطا در اتصال';
+    try {
+        document.getElementById('syncStatus').innerHTML = 'در حال همگام‌سازی...';
+        const res = await fetch(`${SCRIPT_URL}?action=getAll`);
+        const data = await res.json();
+        if (data.success) {
+            localStorage.setItem('students', JSON.stringify(data.students));
+            localStorage.setItem('charges', JSON.stringify(data.charges));
+            localStorage.setItem('purchases', JSON.stringify(data.purchases));
+            localStorage.setItem('stalls', JSON.stringify(data.stalls));
+            document.getElementById('syncStatus').innerHTML = '✅ همگام‌سازی انجام شد.';
+        }
+    } catch (err) {
+        document.getElementById('syncStatus').innerHTML = '❌ خطا در اتصال به سرور';
     }
 }
 
-// ========== ثبت‌نام ==========
+// 🧍 ثبت نام دانش‌آموز
 async function registerStudent() {
     const name = document.getElementById('regName').value.trim();
     const studentId = document.getElementById('regStudentId').value.trim();
+    const msg = document.getElementById('registerMessage');
     
     if (!name || !studentId) {
-        showMessage('registerMessage', 'لطفاً تمام فیلدها را پر کنید');
+        msg.innerHTML = `<div class="error">لطفاً همه فیلدها را پر کنید</div>`;
         return;
     }
     
-    const result = await callAPI('saveStudent', { name, studentId });
-    
-    if (result.success) {
-        showMessage('registerMessage', '✅ ثبت‌نام با موفقیت انجام شد!', 'success');
+    const res = await fetch(`${SCRIPT_URL}?action=saveStudent&name=${encodeURIComponent(name)}&studentId=${studentId}`);
+    const data = await res.json();
+    if (data.success) {
+        msg.innerHTML = `<div class="success">ثبت‌نام با موفقیت انجام شد ✅</div>`;
         await syncData();
-        setTimeout(() => showPage('loginPage'), 2000);
     } else {
-        showMessage('registerMessage', result.error || 'خطا در ثبت‌نام');
+        msg.innerHTML = `<div class="error">${data.error}</div>`;
     }
 }
 
-// ========== ورود ==========
-async function loginStudent() {
+// 🔐 ورود دانش‌آموز
+function loginStudent() {
     const name = document.getElementById('loginName').value.trim();
     const studentId = document.getElementById('loginStudentId').value.trim();
+    const msg = document.getElementById('loginMessage');
     
-    if (!name || !studentId) {
-        showMessage('loginMessage', 'لطفاً تمام فیلدها را پر کنید');
+    const students = JSON.parse(localStorage.getItem('students') || '[]');
+    const user = students.find(s => s.studentId == studentId && s.name == name);
+    if (!user) {
+        msg.innerHTML = `<div class="error">دانش‌آموز یافت نشد ❌</div>`;
         return;
     }
+    currentUser = user;
+    showWallet();
+}
+
+// 💰 نمایش کیف پول
+function showWallet() {
+    document.getElementById('walletUser').innerHTML = `${currentUser.name} (${currentUser.studentId})`;
+    document.getElementById('balance').innerText = currentUser.balance;
     
-    await syncData();
+    const purchases = JSON.parse(localStorage.getItem('purchases') || '[]')
+        .filter(p => p.studentId == currentUser.studentId);
     
-    const student = allData.students.find(s => 
-        s.studentId == studentId && s.name === name
-    );
+    const totalSpent = purchases.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    document.getElementById('totalSpent').innerText = totalSpent;
+    const list = purchases.map(p => `
+        <div class="transaction purchase">
+            <div class="transaction-header">${p.stall} - ${p.amount} تومان</div>
+            <div class="transaction-details">${new Date(p.date).toLocaleString()} | ${p.description || ''}</div>
+        </div>
+    `).join('');
+    document.getElementById('walletTransactions').innerHTML = list || '<div class="loading">تراکنش ثبت نشده</div>';
     
-    if (student) {
-        currentUser = student;
-        showWallet();
-    } else {
-        showMessage('loginMessage', 'اطلاعات وارد شده صحیح نیست');
-    }
+    showPage('walletPage');
 }
 
 function logout() {
@@ -586,217 +608,112 @@ function logout() {
     showPage('welcomePage');
 }
 
-// ========== کیف پول ==========
-async function showWallet() {
-    await syncData();
-    
-    const student = allData.students.find(s => s.studentId == currentUser.studentId);
-    if (!student) {
-        logout();
-        return;
-    }
-    
-    currentUser = student;
-    
-    document.getElementById('walletUser').textContent = `${currentUser.name} - کد: ${currentUser.studentId}`;
-    document.getElementById('balance').textContent = formatNumber(currentUser.balance || 0);
-    
-    // تعداد خریدها
-    const userPurchases = allData.purchases.filter(p => p.studentId == currentUser.studentId);
-    document.getElementById('totalPurchases').textContent = formatNumber(userPurchases.length);
-    
-    // غرفه‌ها
-    const stallSelect = document.getElementById('purchaseStall');
-    stallSelect.innerHTML = '<option value="">انتخاب غرفه...</option>';
-    allData.stalls.forEach(stall => {
-        const option = document.createElement('option');
-        option.value = stall.code;
-        option.textContent = stall.name;
-        stallSelect.appendChild(option);
-    });
-    
-    // تراکنش‌ها
-    const transDiv = document.getElementById('transactions');
-    transDiv.innerHTML = '';
-    
-    const userCharges = allData.charges.filter(c => c.studentId == currentUser.studentId);
-    const allTransactions = [
-        ...userCharges.map(c => ({ ...c, type: 'charge' })),
-        ...userPurchases.map(p => ({ ...p, type: 'purchase' }))
-    ].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    allTransactions.forEach(t => {
-        const div = document.createElement('div');
-        div.className = `transaction ${t.type}`;
-        div.innerHTML = `
-            <div class="transaction-header">
-                <span>${t.type === 'charge' ? '⚡ شارژ' : '🛒 خرید'}</span>
-                <span>${formatNumber(t.amount)} تومان</span>
-            </div>
-            <div class="transaction-details">
-                ${t.type === 'charge' ? 'شارژ حساب' : (t.stall + ' - ' + (t.description || 'خرید'))}
-                <br>
-                ${new Date(t.date).toLocaleString('fa-IR')}
-            </div>
-        `;
-        transDiv.appendChild(div);
-    });
-    
-    showPage('walletPage');
-}
-
-function quickPay(amount) {
-    document.getElementById('purchaseAmount').value = amount;
-}
-
-async function makePurchase() {
-    const amount = parseInt(document.getElementById('purchaseAmount').value);
-    const stall = document.getElementById('purchaseStall').value;
-    const description = document.getElementById('purchaseDesc').value.trim();
-    
-    if (!amount || !stall) {
-        showMessage('purchaseMessage', 'لطفاً مبلغ و غرفه را انتخاب کنید');
-        return;
-    }
-    
-    if (amount > currentUser.balance) {
-        showMessage('purchaseMessage', 'موجودی کافی نیست!');
-        return;
-    }
-    
-    const result = await callAPI('savePurchase', {
-        studentId: currentUser.studentId,
-        amount,
-        stall,
-        description
-    });
-    
-    if (result.success) {
-        showMessage('purchaseMessage', '✅ خرید با موفقیت انجام شد!', 'success');
-        document.getElementById('purchaseAmount').value = '';
-        document.getElementById('purchaseDesc').value = '';
-        await showWallet();
+// 🛍 خرید سریع
+async function buyItem(stall, amount) {
+    if (!currentUser) return;
+    const desc = prompt(`توضیح خرید از ${stall}:`, 'خرید کالا');
+    const res = await fetch(`${SCRIPT_URL}?action=savePurchase&studentId=${currentUser.studentId}&stall=${stall}&amount=${amount}&description=${encodeURIComponent(desc)}`);
+    const data = await res.json();
+    if (data.success) {
+        alert(`✅ خرید انجام شد! موجودی جدید: ${data.newBalance} تومان`);
+        await syncData();
+        loginStudent();
     } else {
-        showMessage('purchaseMessage', result.error || 'خطا در خرید');
+        alert(`❌ خطا: ${data.error}`);
     }
 }
 
-// ========== پنل ادمین ==========
+// 👔 ورود ادمین
 function adminLogin() {
-    const pass = document.getElementById('adminPassword').value;
-    
+    const pass = document.getElementById('adminPass').value.trim();
     if (pass === ADMIN_PASS) {
-        document.getElementById('adminLogin').style.display = 'none';
+        document.getElementById('adminLoginSection').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
-        updateAdminData();
     } else {
-        showMessage('adminLoginMessage', 'رمز عبور اشتباه است');
+        alert('❌ رمز عبور اشتباه است');
     }
 }
 
-function adminLogout() {
-    document.getElementById('adminLogin').style.display = 'block';
-    document.getElementById('adminDashboard').style.display = 'none';
-    document.getElementById('adminPassword').value = '';
+// 💵 شارژ کیف پول
+async function chargeWallet() {
+    const studentId = document.getElementById('chargeStudentId').value.trim();
+    const amount = Number(document.getElementById('chargeAmount').value);
+    if (!studentId || !amount) return alert('⚠️ ورودی‌ها را بررسی کنید');
+    
+    const res = await fetch(`${SCRIPT_URL}?action=saveCharge&studentId=${studentId}&amount=${amount}&cash=${amount}`);
+    const data = await res.json();
+    if (data.success) {
+        alert(`✅ کیف پول شارژ شد. موجودی جدید: ${data.newBalance}`);
+        await syncData();
+    } else {
+        alert(`❌ خطا: ${data.error}`);
+    }
+}
+
+// ➕ افزودن غرفه جدید
+async function addStall() {
+    const code = document.getElementById('stallCodeAdd').value.trim();
+    const name = document.getElementById('stallNameAdd').value.trim();
+    if (!code || !name) return alert('⚠️ فیلدها خالی هستند');
+    
+    const res = await fetch(`${SCRIPT_URL}?action=saveStall&code=${code}&name=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    if (data.success) {
+        alert(`✅ غرفه افزوده شد. رمز عبور: ${data.password}`);
+        await syncData();
+    }
+}
+
+// 🏪 ورود غرفه‌دار
+async function stallLogin() {
+    const sc = document.getElementById('stallCode').value.trim();
+    const pw = document.getElementById('stallPassword').value.trim();
+    const msg = document.getElementById('stallLoginMessage');
+    
+    const res = await fetch(`${SCRIPT_URL}?action=stallLogin&stallCode=${sc}&password=${pw}`);
+    const data = await res.json();
+    if (data.success) {
+        currentStall = data.stall;
+        showStallDashboard();
+    } else {
+        msg.innerHTML = `<div class="error">${data.error}</div>`;
+    }
+}
+
+// 📊 نمایش داشبورد غرفه‌دار
+async function showStallDashboard() {
+    document.getElementById('stallInfo').innerHTML = `${currentStall.name} (${currentStall.code})`;
+    await refreshStallStats();
+    showPage('stallDashboard');
+}
+
+function stallLogout() {
+    currentStall = null;
     showPage('welcomePage');
 }
 
-async function updateAdminData() {
-    await syncData();
-    
-    document.getElementById('totalStudents').textContent = formatNumber(allData.students.length);
-    document.getElementById('totalStalls').textContent = formatNumber(allData.stalls.length);
-    
-    // لیست دانش‌آموزان برای شارژ
-    const chargeSelect = document.getElementById('chargeStudent');
-    chargeSelect.innerHTML = '<option value="">انتخاب دانش‌آموز...</option>';
-    allData.students.forEach(student => {
-        const option = document.createElement('option');
-        option.value = student.studentId;
-        option.textContent = `${student.name} (کد: ${student.studentId}) - موجودی: ${formatNumber(student.balance)} تومان`;
-        chargeSelect.appendChild(option);
-    });
-    
-    // گزارشات
-    const reportsDiv = document.getElementById('adminReports');
-    reportsDiv.innerHTML = '';
-    
-    allData.charges.slice().reverse().slice(0, 10).forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'transaction';
-        div.innerHTML = `
-            <div class="transaction-header">
-                <span>⚡ شارژ: ${c.name}</span>
-                <span>${formatNumber(c.amount)} تومان</span>
+// 🔄 دریافت آمار غرفه
+async function refreshStallStats() {
+    const res = await fetch(`${SCRIPT_URL}?action=getStallStats&stallCode=${currentStall.code}`);
+    const data = await res.json();
+    if (data.success) {
+        const s = data.stats;
+        document.getElementById('todaySales').innerText = s.todaySales;
+        document.getElementById('todayAmount').innerText = s.todayAmount;
+        document.getElementById('totalSales').innerText = s.totalSales;
+        document.getElementById('totalAmount').innerText = s.totalAmount;
+        document.getElementById('avgSale').innerText = Math.round(s.totalAmount / (s.totalSales || 1));
+        
+        const transHTML = s.recentPurchases.map(p => `
+            <div class="transaction purchase">
+                <div class="transaction-header">${p.name} - ${p.amount} تومان</div>
+                <div class="transaction-details">${new Date(p.date).toLocaleString()} | ${p.description || ''}</div>
             </div>
-            <div class="transaction-details">
-                نقدی: ${formatNumber(c.cash)} تومان
-                <br>
-                ${new Date(c.date).toLocaleString('fa-IR')}
-            </div>
-        `;
-        reportsDiv.appendChild(div);
-    });
-}
-
-async function chargeStudent() {
-    const studentId = document.getElementById('chargeStudent').value;
-    const amount = parseInt(document.getElementById('chargeAmount').value);
-    const cash = parseInt(document.getElementById('chargeCash').value);
-    
-    if (!studentId || !amount || !cash) {
-        showMessage('adminMessage', 'لطفاً تمام فیلدها را پر کنید');
-        return;
-    }
-    
-    const result = await callAPI('saveCharge', { studentId, amount, cash });
-    
-    if (result.success) {
-        showMessage('adminMessage', '✅ شارژ با موفقیت انجام شد!', 'success');
-        document.getElementById('chargeAmount').value = '';
-        document.getElementById('chargeCash').value = '';
-        await updateAdminData();
-    } else {
-        showMessage('adminMessage', result.error || 'خطا در شارژ');
+        `).join('');
+        document.getElementById('stallTransactions').innerHTML = transHTML || '<div class="loading">هیچ تراکنش ثبت نشده</div>';
     }
 }
-
-async function addStall() {
-    const name = document.getElementById('stallName').value.trim();
-    const code = document.getElementById('stallCode').value.trim().toUpperCase();
-    
-    if (!name || !code) {
-        showMessage('adminMessage', 'لطفاً نام و کد غرفه را وارد کنید');
-        return;
-    }
-    
-    const result = await callAPI('saveStall', { name, code });
-    
-    if (result.success) {
-        showMessage('adminMessage', '✅ غرفه با موفقیت اضافه شد!', 'success');
-        document.getElementById('stallName').value = '';
-        document.getElementById('stallCode').value = '';
-        await updateAdminData();
-    } else {
-        showMessage('adminMessage', result.error || 'خطا در افزودن غرفه');
-    }
-}
-
-async function resetSystem() {
-    if (!confirm('⚠️ تمام داده‌ها پاک خواهند شد! آیا مطمئن هستید؟')) return;
-    if (!confirm('⚠️⚠️ این عملیات غیرقابل بازگشت است! دوباره تأیید کنید:')) return;
-    
-    // این بخش نیاز به تابع جداگانه در Apps Script دارد
-    alert('برای ریست کامل، از Google Sheets مستقیماً جداول را پاک کنید و دوباره اسکریپت را اجرا کنید.');
-}
-
-// ========== شروع برنامه ==========
-window.onload = async function() {
-    await initSystem();
-};
 </script>
 
 </body>
 </html>
-زب
-
