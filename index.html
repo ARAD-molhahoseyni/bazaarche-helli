@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> 10 بازارچه علامه‌حلّی</title>
+<title>بازارچه علامه‌حلّی 10</title>
 <style>
 * {
     margin: 0;
@@ -286,6 +286,29 @@ body {
     padding: 40px 20px;
     color: #999;
 }
+
+.sync-status {
+    background: #e3f2fd;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.sync-status.syncing {
+    background: #fff3e0;
+}
+
+.sync-status.error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.sync-status.success {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
 </style>
 </head>
 <body>
@@ -293,12 +316,15 @@ body {
 <!-- صفحه خوش‌آمدگویی -->
 <div id="welcomePage" class="container">
     <div class="header">
-        <h1>🎓  بازارچه علامه‌حلّی ده</h1>
+        <h1>🎓 بازارچه علامه‌حلّی ده</h1>
         <p>سیستم پرداخت دیجیتال</p>
     </div>
     <div class="content">
         <div class="info-box">
             👋 خوش آمدید! لطفاً یکی از گزینه‌ها را انتخاب کنید:
+        </div>
+        <div class="sync-status" id="syncStatus">
+            🔄 در حال بررسی اتصال...
         </div>
         <button class="btn btn-primary" onclick="goToRegister()">
             ✨ ثبت‌نام (کاربر جدید)
@@ -308,6 +334,9 @@ body {
         </button>
         <button class="btn btn-outline" onclick="goToAdmin()">
             👨‍💼 پنل مدیریت
+        </button>
+        <button class="btn btn-outline" onclick="forceSync()">
+            🔄 همگام‌سازی داده‌ها
         </button>
     </div>
 </div>
@@ -468,7 +497,7 @@ body {
         </button>
         
         <div class="info-box" style="margin-top: 20px;">
-            💡 رمز پیش‌فرض: <code></code>
+            💡 رمز پیش‌فرض: <code>adBazaar@1404#Helli10</code>
         </div>
     </div>
 </div>
@@ -548,7 +577,8 @@ body {
 </div>
 
 <script>
-// متغیرهای اصلی
+// تنظیمات
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxniYITgs2x5_6X3X9j_x4plAq4W1xvEJnlCUtZP80zBkeR9xcV-SnYJIqpKEck24aI/exec';
 let currentUser = null;
 const ADMIN_PASS = 'adBazaar@1404#Helli10';
 
@@ -581,8 +611,111 @@ function goToAdmin() {
     showPage('adminLoginPage');
 }
 
+// سیستم ذخیره‌سازی Google Sheets
+async function saveToSheet(table, data) {
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'save',
+                table: table,
+                data: data
+            })
+        });
+        
+        const result = await response.json();
+        return result.success;
+    } catch (error) {
+        console.error('خطا در ذخیره‌سازی:', error);
+        return false;
+    }
+}
+
+async function loadFromSheet(table) {
+    try {
+        const response = await fetch(`${SCRIPT_URL}?table=${table}`);
+        const result = await response.json();
+        return result.data || [];
+    } catch (error) {
+        console.error('خطا در بارگذاری:', error);
+        return [];
+    }
+}
+
+// مدیریت داده‌ها
+async function loadAllData() {
+    updateSyncStatus('🔄 در حال بارگذاری داده‌ها...', 'syncing');
+    
+    try {
+        const [students, stands, charges, payments] = await Promise.all([
+            loadFromSheet('students'),
+            loadFromSheet('stands'),
+            loadFromSheet('charges'),
+            loadFromSheet('payments')
+        ]);
+
+        // ذخیره در localStorage برای دسترسی سریع
+        localStorage.setItem('students', JSON.stringify(students));
+        localStorage.setItem('stands', JSON.stringify(stands));
+        localStorage.setItem('chargeHistory', JSON.stringify(charges));
+        localStorage.setItem('paymentHistory', JSON.stringify(payments));
+
+        updateSyncStatus('✅ داده‌ها همگام شد', 'success');
+        return true;
+    } catch (error) {
+        updateSyncStatus('❌ خطا در همگام‌سازی', 'error');
+        return false;
+    }
+}
+
+async function saveAllData() {
+    updateSyncStatus('🔄 در حال ذخیره‌سازی...', 'syncing');
+    
+    try {
+        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        const stands = JSON.parse(localStorage.getItem('stands') || '[]');
+        const charges = JSON.parse(localStorage.getItem('chargeHistory') || '[]');
+        const payments = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
+
+        const results = await Promise.all([
+            saveToSheet('students', students),
+            saveToSheet('stands', stands),
+            saveToSheet('charges', charges),
+            saveToSheet('payments', payments)
+        ]);
+
+        const success = results.every(r => r === true);
+        
+        if (success) {
+            updateSyncStatus('✅ داده‌ها ذخیره شد', 'success');
+        } else {
+            updateSyncStatus('⚠️ برخی داده‌ها ذخیره نشد', 'error');
+        }
+        
+        return success;
+    } catch (error) {
+        updateSyncStatus('❌ خطا در ذخیره‌سازی', 'error');
+        return false;
+    }
+}
+
+function updateSyncStatus(message, type = '') {
+    const statusEl = document.getElementById('syncStatus');
+    if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.className = `sync-status ${type}`;
+    }
+}
+
+async function forceSync() {
+    await loadAllData();
+}
+
 // ثبت‌نام
-function doRegister() {
+async function doRegister() {
     const name = document.getElementById('regName').value.trim();
     const code = document.getElementById('regCode').value.trim();
     
@@ -612,6 +745,9 @@ function doRegister() {
     
     students.push(newStudent);
     localStorage.setItem('students', JSON.stringify(students));
+    
+    // ذخیره در Sheets
+    await saveAllData();
     
     alert(`✅ ثبت‌نام موفق!\n\nخوش آمدید ${name}\nکد شما: ${code}\n\nموجودی شما ۰ تومان است.`);
     
@@ -762,7 +898,8 @@ function setQuickAmount(amount) {
     document.getElementById('payAmount').value = amount;
 }
 
-function doPayment() {
+// پرداخت
+async function doPayment() {
     const standCode = document.getElementById('standSelect').value;
     const amount = parseInt(document.getElementById('payAmount').value);
     const description = document.getElementById('payDesc').value.trim();
@@ -811,6 +948,9 @@ function doPayment() {
         timestamp: new Date().toISOString()
     });
     localStorage.setItem('paymentHistory', JSON.stringify(payments));
+    
+    // ذخیره در Sheets
+    await saveAllData();
     
     // پاک کردن فرم
     document.getElementById('standSelect').value = '';
@@ -892,7 +1032,8 @@ function loadChargeHistory() {
     `).join('');
 }
 
-function doCharge() {
+// شارژ حساب
+async function doCharge() {
     const studentCode = document.getElementById('chargeStudentSelect').value;
     const amount = parseInt(document.getElementById('chargeAmount').value);
     const cash = parseInt(document.getElementById('cashReceived').value);
@@ -939,6 +1080,9 @@ function doCharge() {
     });
     localStorage.setItem('chargeHistory', JSON.stringify(charges));
     
+    // ذخیره در Sheets
+    await saveAllData();
+    
     // پاک کردن فرم
     document.getElementById('chargeStudentSelect').value = '';
     document.getElementById('chargeAmount').value = '';
@@ -950,7 +1094,8 @@ function doCharge() {
     loadAdminDashboard();
 }
 
-function showAddStand() {
+// افزودن غرفه
+async function showAddStand() {
     const name = prompt('نام غرفه:');
     if (!name) return;
     
@@ -966,6 +1111,9 @@ function showAddStand() {
     
     stands.push({ name, code });
     localStorage.setItem('stands', JSON.stringify(stands));
+    
+    // ذخیره در Sheets
+    await saveAllData();
     
     alert(`✅ غرفه "${name}" اضافه شد`);
     loadAdminDashboard();
@@ -991,17 +1139,27 @@ function downloadData() {
     alert('✅ فایل بک‌آپ دانلود شد');
 }
 
-function resetAll() {
+async function resetAll() {
     if (!confirm('⚠️ آیا مطمئنید؟ تمام داده‌ها حذف می‌شود!')) return;
     if (!confirm('⚠️ آخرین هشدار! این عمل قابل بازگشت نیست.')) return;
     
     localStorage.clear();
+    
+    // پاک کردن داده‌ها از Sheets
+    await saveToSheet('students', []);
+    await saveToSheet('stands', []);
+    await saveToSheet('charges', []);
+    await saveToSheet('payments', []);
+    
     alert('✅ سیستم ریست شد');
     goToWelcome();
 }
 
 // شروع برنامه
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', async function() {
+    // بارگذاری اولیه داده‌ها
+    await loadAllData();
+    
     // بررسی کاربر قبلی
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -1013,12 +1171,13 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     
     // اضافه کردن غرفه‌های پیش‌فرض
-    if (!localStorage.getItem('stands')) {
+    if (!localStorage.getItem('stands') || JSON.parse(localStorage.getItem('stands')).length === 0) {
         localStorage.setItem('stands', JSON.stringify([
             { name: 'غرفه غذا', code: 'FOOD1' },
             { name: 'غرفه نوشیدنی', code: 'DRINK1' },
             { name: 'غرفه بازی', code: 'GAME1' }
         ]));
+        await saveAllData();
     }
 });
 </script>
