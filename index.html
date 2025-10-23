@@ -1,866 +1,1180 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>سیستم مدیریت بازارچه</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 1200px;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
-    }
-
-    .header h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
-    }
-
-    .header p {
-      opacity: 0.9;
-      font-size: 1.1em;
-    }
-
-    .content {
-      padding: 40px;
-    }
-
-    .panel {
-      display: none;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    /* صفحه انتخاب نوع ورود */
-    .login-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    .login-option {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 50px 30px;
-      border-radius: 15px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .login-option:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    }
-
-    .login-option i {
-      font-size: 4em;
-      margin-bottom: 20px;
-      display: block;
-    }
-
-    .login-option h2 {
-      font-size: 1.8em;
-      margin-bottom: 10px;
-    }
-
-    .login-option p {
-      opacity: 0.9;
-    }
-
-    /* فرم‌های ورود */
-    .login-form {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 1em;
-      transition: border-color 0.3s;
-      font-family: inherit;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: inherit;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary {
-      background: #f0f0f0;
-      color: #333;
-      margin-top: 10px;
-    }
-
-    .btn-secondary:hover {
-      background: #e0e0e0;
-    }
-
-    .btn-success {
-      background: #10b981;
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: #059669;
-    }
-
-    .btn-danger {
-      background: #ef4444;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #dc2626;
-    }
-
-    /* جستجوی دانش‌آموز */
-    .search-box {
-      position: relative;
-      margin-bottom: 30px;
-    }
-
-    .search-results {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border: 2px solid #667eea;
-      border-radius: 10px;
-      max-height: 300px;
-      overflow-y: auto;
-      z-index: 100;
-      display: none;
-    }
-
-    .search-results.show {
-      display: block;
-    }
-
-    .search-item {
-      padding: 15px;
-      border-bottom: 1px solid #f0f0f0;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .search-item:hover {
-      background: #f8f9ff;
-    }
-
-    .search-item:last-child {
-      border-bottom: none;
-    }
-
-    /* جدول */
-    .table-container {
-      overflow-x: auto;
-      margin-top: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    table thead {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    table th,
-    table td {
-      padding: 12px 15px;
-      text-align: right;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    table tbody tr:hover {
-      background: #f8f9ff;
-    }
-
-    /* کارت‌های آمار */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 25px;
-      border-radius: 15px;
-      text-align: center;
-    }
-
-    .stat-card h3 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-
-    .stat-card p {
-      opacity: 0.9;
-      font-size: 1.1em;
-    }
-
-    /* نوتیفیکیشن */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 15px 25px;
-      border-radius: 10px;
-      color: white;
-      font-weight: 600;
-      z-index: 1000;
-      display: none;
-      animation: slideIn 0.3s;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .notification.success {
-      background: #10b981;
-    }
-
-    .notification.error {
-      background: #ef4444;
-    }
-
-    .notification.show {
-      display: block;
-    }
-
-    /* لودینگ */
-    .loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .loading.show {
-      display: block;
-    }
-
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* نمودار */
-    .chart-container {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      margin-top: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .chart-bar {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .chart-label {
-      min-width: 150px;
-      font-weight: 600;
-    }
-
-    .chart-value {
-      flex: 1;
-      height: 30px;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      border-radius: 5px;
-      position: relative;
-      margin: 0 10px;
-    }
-
-    .chart-amount {
-      font-weight: 600;
-      color: #667eea;
-    }
-
-    /* دکمه آپلود فایل */
-    .file-upload {
-      border: 2px dashed #667eea;
-      border-radius: 10px;
-      padding: 30px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-bottom: 20px;
-    }
-
-    .file-upload:hover {
-      background: #f8f9ff;
-      border-color: #764ba2;
-    }
-
-    .file-upload input[type="file"] {
-      display: none;
-    }
-
-    /* تب‌ها */
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    .tab {
-      padding: 15px 30px;
-      background: transparent;
-      border: none;
-      border-bottom: 3px solid transparent;
-      cursor: pointer;
-      font-size: 1.1em;
-      font-weight: 600;
-      color: #666;
-      transition: all 0.3s;
-      font-family: inherit;
-    }
-
-    .tab.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
-    }
-
-    .tab:hover {
-      color: #667eea;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .login-selector {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tabs {
-        overflow-x: auto;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم مدیریت بازارچه - دبیرستان علامه حلی 10</title>
+    
+    <!-- کتابخانه SheetJS برای Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 🎯 هدر بهبود یافته */
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .school-logo {
+            font-size: 60px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header-text h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .header-text .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: normal;
+        }
+
+        .date-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* 🎨 صفحه انتخاب ورود - استیکرهای زیبا */
+        .login-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .login-option {
+            background: white;
+            border-radius: 25px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-option:hover::before {
+            left: 100%;
+        }
+
+        .login-option:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+
+        .login-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .login-option:nth-child(1) .login-icon {
+            animation-delay: 0s;
+        }
+
+        .login-option:nth-child(2) .login-icon {
+            animation-delay: 0.5s;
+        }
+
+        .login-option h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-option p {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .login-option:nth-child(1) {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 3px solid #667eea;
+        }
+
+        .login-option:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb15, #f5576c15);
+            border: 3px solid #f093fb;
+        }
+
+        /* 🎯 بخش‌های پنل */
+        .panel {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* 🎨 دکمه‌های بهبود یافته */
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* فرم‌ها */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* نوتیفیکیشن */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        }
+
+        /* لودینگ */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* جداول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* تب‌ها */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        /* جستجوی دانش‌آموز */
+        .student-search {
+            position: relative;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
+        }
+
+        .search-item:hover {
+            background: #f5f5f5;
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-text h1 {
+                font-size: 1.5em;
+            }
+
+            .school-logo {
+                font-size: 40px;
+            }
+
+            .login-icon {
+                font-size: 60px;
+            }
+
+            .login-option h2 {
+                font-size: 1.4em;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .header-text h1 {
+                font-size: 1.2em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="notification" id="notification"></div>
-
-  <div class="container">
-    <div class="header">
-      <h1>🏪 سیستم مدیریت بازارچه</h1>
-      <p id="headerSubtitle">سامانه یکپارچه فروش و مدیریت</p>
-    </div>
-
-    <div class="content">
-      <!-- صفحه انتخاب نوع ورود -->
-      <div class="panel active" id="panelSelectLogin">
-        <div class="login-selector">
-          <div class="login-option" onclick="showPanel('panelStallLogin')">
-            <i>🧑‍🍳</i>
-            <h2>پنل فروشنده</h2>
-            <p>ورود به پنل غرفه‌داری</p>
-          </div>
-          <div class="login-option" onclick="showPanel('panelAdminLogin')">
-            <i>👨‍💼</i>
-            <h2>پنل مدیریت</h2>
-            <p>ورود به پنل مدیریت کل</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- ورود غرفه‌دار -->
-      <div class="panel" id="panelStallLogin">
-        <div class="login-form">
-          <h2 style="text-align: center; margin-bottom: 30px;">ورود غرفه‌دار</h2>
-          <div class="form-group">
-            <label>کد غرفه:</label>
-            <input type="text" id="stallCode" placeholder="مثال: FOOD1">
-          </div>
-          <div class="form-group">
-            <label>رمز عبور:</label>
-            <input type="password" id="stallPassword" placeholder="رمز عبور خود را وارد کنید">
-          </div>
-          <button class="btn btn-primary" onclick="stallLogin()">ورود</button>
-          <button class="btn btn-secondary" onclick="showPanel('panelSelectLogin')">بازگشت</button>
-        </div>
-      </div>
-
-      <!-- پنل فروشنده -->
-      <div class="panel" id="panelStall">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-          <h2>پنل فروشنده: <span id="stallNameDisplay"></span></h2>
-          <button class="btn btn-danger" style="width: auto; padding: 10px 20px;" onclick="logout()">خروج</button>
+    <div class="container">
+        <!-- هدر -->
+        <div class="header">
+            <div class="header-content">
+                <div class="school-logo">🏫</div>
+                <div class="header-text">
+                    <h1>سیستم مدیریت بازارچه</h1>
+                    <p class="subtitle">دبیرستان علامه حلی 10 - دوره اول</p>
+                    <div class="date-badge">📅 امروز: <span id="currentDate"></span></div>
+                </div>
+            </div>
         </div>
 
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('stallSale')">ثبت فروش</button>
-          <button class="tab" onclick="switchTab('stallHistory')">تاریخچه فروش</button>
+        <!-- صفحه انتخاب ورود -->
+        <div id="panelSelector" class="panel active">
+            <div class="login-selector">
+                <div class="login-option" onclick="showLoginPanel('stall')">
+                    <span class="login-icon">🧑‍🍳</span>
+                    <h2>پنل فروشنده</h2>
+                    <p>ثبت فروش‌های نقد و نسیه<br>مشاهده تاریخچه فروش</p>
+                </div>
+                
+                <div class="login-option" onclick="showLoginPanel('admin')">
+                    <span class="login-icon">👨‍💼</span>
+                    <h2>پنل مدیریت</h2>
+                    <p>مدیریت دانش‌آموزان<br>گزارش‌گیری و آمارها</p>
+                </div>
+            </div>
         </div>
 
-        <!-- تب ثبت فروش -->
-        <div class="tab-content active" id="tabStallSale">
-          <div class="search-box">
+        <!-- ورود فروشنده -->
+        <div id="panelStallLogin" class="panel">
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">🧑‍🍳 ورود فروشنده</h2>
             <div class="form-group">
-              <label>جستجوی دانش‌آموز (نام یا کد):</label>
-              <input type="text" id="studentSearch" placeholder="نام یا کد دانش‌آموز را وارد کنید" oninput="searchStudent()">
+                <label>کد غرفه:</label>
+                <input type="text" id="stallCode" placeholder="مثال: FOOD1">
             </div>
-            <div class="search-results" id="searchResults"></div>
-          </div>
-
-          <div class="form-group">
-            <label>دانش‌آموز انتخاب شده:</label>
-            <input type="text" id="selectedStudent" readonly placeholder="ابتدا دانش‌آموز را جستجو کنید">
-          </div>
-
-          <div class="form-group">
-            <label>مبلغ (تومان):</label>
-            <input type="number" id="saleAmount" placeholder="مبلغ را وارد کنید">
-          </div>
-
-          <div class="form-group">
-            <label>نوع پرداخت:</label>
-            <select id="paymentType">
-              <option value="نقد">نقد</option>
-              <option value="نسیه">نسیه (بدهکار)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>شرح/اقلام خریداری شده:</label>
-            <textarea id="saleDescription" rows="3" placeholder="توضیحات و اقلام خریداری شده را بنویسید..."></textarea>
-          </div>
-
-          <button class="btn btn-success" onclick="submitSale()">ثبت فروش</button>
+            <div class="form-group">
+                <label>رمز عبور:</label>
+                <input type="password" id="stallPassword" placeholder="رمز عبور را وارد کنید">
+            </div>
+            <button class="btn" onclick="handleStallLogin()">ورود</button>
+            <button class="btn btn-back" onclick="showPanel('panelSelector')">بازگشت</button>
         </div>
 
-        <!-- تب تاریخچه -->
-        <div class="tab-content" id="tabStallHistory">
-          <button class="btn btn-primary" onclick="loadStallSales()">بارگذاری مجدد</button>
-          <div class="loading" id="loadingStallSales">
-            <div class="spinner"></div>
-            <p>در حال بارگذاری...</p>
-          </div>
-          <div class="table-container">
-            <table id="stallSalesTable">
-              <thead>
-                <tr>
-                  <th>تاریخ</th>
-                  <th>ساعت</th>
-                  <th>دانش‌آموز</th>
-                  <th>مبلغ</th>
-                  <th>نوع پرداخت</th>
-                  <th>شرح</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        <!-- داشبورد فروشنده -->
+        <div id="panelStallDashboard" class="panel">
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">خوش آمدید! <span id="stallNameDisplay"></span></h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchStallTab('new-sale')">ثبت فروش جدید</button>
+                <button class="tab" onclick="switchStallTab('history')">تاریخچه فروش</button>
+            </div>
 
-      <!-- ورود مدیر -->
-      <div class="panel" id="panelAdminLogin">
-        <div class="login-form">
-          <h2 style="text-align: center; margin-bottom: 30px;">ورود مدیریت</h2>
-          <div class="form-group">
-            <label>رمز عبور مدیریت:</label>
-            <input type="password" id="adminPassword" placeholder="رمز عبور را وارد کنید">
-          </div>
-          <button class="btn btn-primary" onclick="adminLogin()">ورود</button>
-          <button class="btn btn-secondary" onclick="showPanel('panelSelectLogin')">بازگشت</button>
-        </div>
-      </div>
+            <!-- ثبت فروش جدید -->
+            <div id="stallTabNewSale" class="tab-content">
+                <div class="form-group student-search">
+                    <label>جستجوی دانش‌آموز:</label>
+                    <input type="text" id="studentSearch" placeholder="نام یا کد دانش‌آموز را وارد کنید" oninput="searchStudent()">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
 
-      <!-- پنل مدیریت -->
-      <div class="panel" id="panelAdmin">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-          <h2>پنل مدیریت</h2>
-          <button class="btn btn-danger" style="width: auto; padding: 10px 20px;" onclick="logout()">خروج</button>
-        </div>
+                <div class="form-group">
+                    <label>مبلغ (تومان):</label>
+                    <input type="number" id="saleAmount" placeholder="مثال: 50000">
+                </div>
 
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('adminDashboard')">داشبورد</button>
-          <button class="tab" onclick="switchTab('adminStudents')">دانش‌آموزان</button>
-          <button class="tab" onclick="switchTab('adminDebtors')">بدهکاران</button>
-          <button class="tab" onclick="switchTab('adminSales')">کل فروش‌ها</button>
-          <button class="tab" onclick="switchTab('adminStalls')">آمار غرفه‌ها</button>
+                <div class="form-group">
+                    <label>نوع پرداخت:</label>
+                    <select id="paymentType">
+                        <option value="نقد">💵 نقد</option>
+                        <option value="نسیه">📝 نسیه</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>شرح اقلام:</label>
+                    <textarea id="saleDescription" rows="3" placeholder="مثال: 2 پیتزا، 1 نوشابه"></textarea>
+                </div>
+
+                <button class="btn btn-success" onclick="submitSale()">✅ ثبت فروش</button>
+            </div>
+
+            <!-- تاریخچه فروش -->
+            <div id="stallTabHistory" class="tab-content" style="display: none;">
+                <div class="loading" id="historyLoading">
+                    <div class="spinner"></div>
+                    <p>در حال بارگذاری...</p>
+                </div>
+                <div id="historyContent"></div>
+            </div>
+
+            <button class="btn btn-back" onclick="logout()">خروج</button>
         </div>
 
-        <!-- داشبورد -->
-        <div class="tab-content active" id="tabAdminDashboard">
-          <div class="stats-grid" id="statsGrid"></div>
-          <button class="btn btn-primary" onclick="loadAdminStats()">بروزرسانی آمار</button>
+        <!-- ورود مدیر -->
+        <div id="panelAdminLogin" class="panel">
+            <h2 style="text-align: center; color: #f093fb; margin-bottom: 30px;">👨‍💼 ورود مدیریت</h2>
+            <div class="form-group">
+                <label>رمز عبور مدیریت:</label>
+                <input type="password" id="adminPassword" placeholder="رمز مدیریت را وارد کنید">
+            </div>
+            <button class="btn btn-secondary" onclick="handleAdminLogin()">ورود</button>
+            <button class="btn btn-back" onclick="showPanel('panelSelector')">بازگشت</button>
         </div>
 
-        <!-- دانش‌آموزان -->
-        <div class="tab-content" id="tabAdminStudents">
-          <div class="file-upload" onclick="document.getElementById('excelFile').click()">
-            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
-            <h3>📁 آپلود فایل Excel</h3>
-            <p>فایل Excel لیست دانش‌آموزان را انتخاب کنید</p>
-            <p style="font-size: 0.9em; opacity: 0.7; margin-top: 10px;">فرمت: کد | نام و نام خانوادگی | کلاس</p>
-          </div>
-          <button class="btn btn-success" onclick="downloadStudentsExcel()">دانلود لیست دانش‌آموزان (Excel)</button>
-        </div>
+        <!-- داشبورد مدیر -->
+        <div id="panelAdminDashboard" class="panel">
+            <h2 style="text-align: center; color: #f093fb; margin-bottom: 20px;">پنل مدیریت</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchAdminTab('stats')">آمار کلی</button>
+                <button class="tab" onclick="switchAdminTab('students')">مدیریت دانش‌آموزان</button>
+                <button class="tab" onclick="switchAdminTab('debtors')">بدهکاران</button>
+                <button class="tab" onclick="switchAdminTab('sales')">کل فروش‌ها</button>
+            </div>
 
-        <!-- بدهکاران -->
-        <div class="tab-content" id="tabAdminDebtors">
-          <button class="btn btn-primary" onclick="loadDebtors()">بارگذاری بدهکاران</button>
-          <button class="btn btn-success" onclick="downloadDebtorsExcel()" style="margin-top: 10px;">دانلود لیست بدهکاران (Excel)</button>
-          
-          <div class="loading" id="loadingDebtors">
-            <div class="spinner"></div>
-            <p>در حال بارگذاری...</p>
-          </div>
+            <!-- آمار کلی -->
+            <div id="adminTabStats" class="tab-content">
+                <div class="loading" id="statsLoading">
+                    <div class="spinner"></div>
+                    <p>در حال بارگذاری آمار...</p>
+                </div>
+                <div id="statsContent"></div>
+            </div>
 
-          <div id="debtorsSummary" style="margin: 20px 0;"></div>
-          
-          <div class="table-container">
-            <table id="debtorsTable">
-              <thead>
-                <tr>
-                  <th>کد</th>
-                  <th>نام دانش‌آموز</th>
-                  <th>جمع بدهی</th>
-                  <th>تعداد خرید نسیه</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
+            <!-- مدیریت دانش‌آموزان -->
+            <div id="adminTabStudents" class="tab-content" style="display: none;">
+                <h3>آپلود لیست دانش‌آموزان از Excel</h3>
+                <p style="color: #666; margin: 10px 0;">فرمت فایل: کد | نام و نام خانوادگی | کلاس</p>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" style="margin: 20px 0;">
+                <button class="btn btn-success" onclick="uploadExcel()">📤 آپلود فایل</button>
+            </div>
 
-        <!-- کل فروش‌ها -->
-        <div class="tab-content" id="tabAdminSales">
-          <button class="btn btn-primary" onclick="loadAllSales()">بارگذاری فروش‌ها</button>
-          <button class="btn btn-success" onclick="downloadAllSalesExcel()" style="margin-top: 10px;">دانلود کل فروش‌ها (Excel)</button>
-          
-          <div class="loading" id="loadingAllSales">
-            <div class="spinner"></div>
-            <p>در حال بارگذاری...</p>
-          </div>
-          
-          <div class="table-container">
-            <table id="allSalesTable">
-              <thead>
-                <tr>
-                  <th>ردیف</th>
-                  <th>تاریخ</th>
-                  <th>ساعت</th>
-                  <th>کد دانش‌آموز</th>
-                  <th>نام</th>
-                  <th>غرفه</th>
-                  <th>مبلغ</th>
-                  <th>نوع پرداخت</th>
-                  <th>شرح</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
+            <!-- بدهکاران -->
+            <div id="adminTabDebtors" class="tab-content" style="display: none;">
+                <button class="btn" onclick="loadDebtors()">🔄 بارگذاری مجدد</button>
+                <button class="btn btn-success" onclick="downloadDebtorsExcel()">📥 دانلود Excel</button>
+                <div class="loading" id="debtorsLoading">
+                    <div class="spinner"></div>
+                    <p>در حال بارگذاری...</p>
+                </div>
+                <div id="debtorsContent"></div>
+            </div>
 
-        <!-- آمار غرفه‌ها -->
-        <div class="tab-content" id="tabAdminStalls">
-          <button class="btn btn-primary" onclick="loadStallStats()">بارگذاری آمار</button>
-          
-          <div class="loading" id="loadingStallStats">
-            <div class="spinner"></div>
-            <p>در حال بارگذاری...</p>
-          </div>
-          
-          <div class="chart-container" id="stallStatsChart"></div>
+            <!-- کل فروش‌ها -->
+            <div id="adminTabSales" class="tab-content" style="display: none;">
+                <button class="btn" onclick="loadAllSales()">🔄 بارگذاری مجدد</button>
+                <button class="btn btn-success" onclick="downloadSalesExcel()">📥 دانلود Excel</button>
+                <div class="loading" id="salesLoading">
+                    <div class="spinner"></div>
+                    <p>در حال بارگذاری...</p>
+                </div>
+                <div id="salesContent"></div>
+            </div>
+
+            <button class="btn btn-back" onclick="logout()">خروج</button>
         </div>
-      </div>
     </div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>
-    // متغیرهای سراسری
-    let currentStall = null;
-    let selectedStudentData = null;
-    let debtorsData = [];
-    let allSalesData = [];
-
-    // URL اسکریپت گوگل
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGEIMXE7gNcTzgT2F60WnB0c04uB9AZ3OYhFwoOYHMxJcl6AcF7YslR3H0jT54QzJvCA/exec';
-
-    // نمایش پنل
-    function showPanel(panelId) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(panelId).classList.add('active');
-    }
-
-    // تعویض تب
-    function switchTab(tabName) {
-      // تب‌های غرفه‌دار
-      if (tabName.startsWith('stall')) {
-        document.querySelectorAll('#panelStall .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#panelStall .tab-content').forEach(t => t.classList.remove('active'));
+    <script>
+        // ⚙️ تنظیمات اصلی
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGEIMXE7gNcTzgT2F60WnB0c04uB9AZ3OYhFwoOYHMxJcl6AcF7YslR3H0jT54QzJvCA/exec'; // 🔴 URL خود را اینجا قرار دهید
         
-        event.target.classList.add('active');
-        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
-        
-        if (tabName === 'stallHistory') {
-          loadStallSales();
+        let currentStallCode = '';
+        let currentStallName = '';
+        let selectedStudentData = null;
+        let searchTimeout;
+
+        // 📅 نمایش تاریخ امروز
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fa-IR');
+
+        // 🎯 نمایش پنل
+        function showPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
         }
-      }
-      
-      // تب‌های مدیر
-      if (tabName.startsWith('admin')) {
-        document.querySelectorAll('#panelAdmin .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#panelAdmin .tab-content').forEach(t => t.classList.remove('active'));
-        
-        event.target.classList.add('active');
-        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
-        
-        if (tabName === 'adminDashboard') {
-          loadAdminStats();
+
+        // 🔐 نمایش صفحه ورود
+        function showLoginPanel(type) {
+            if (type === 'stall') {
+                showPanel('panelStallLogin');
+            } else {
+                showPanel('panelAdminLogin');
+            }
         }
-      }
-    }
 
-    // نوتیفیکیشن
-    function showNotification(message, type = 'success') {
-      const notification = document.getElementById('notification');
-      notification.textContent = message;
-      notification.className = `notification ${type} show`;
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
-    }
+        // 🔔 نوتیفیکیشن
+        function showNotification(message, type = 'success') {
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.textContent = message;
+            document.body.appendChild(notif);
 
-    // درخواست به سرور
-    async function sendRequest(data) {
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(data)
+            setTimeout(() => {
+                notif.remove();
+            }, 3000);
+        }
+
+        // 📡 ارسال درخواست به سرور
+        async function sendRequest(data) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'no-cors'
+                });
+                
+                // به دلیل no-cors نمی‌توانیم response را بخوانیم
+                // باید از Apps Script به صورت مستقیم استفاده کنیم
+                return new Promise((resolve) => {
+                    google.script.run
+                        .withSuccessHandler(resolve)
+                        .withFailureHandler((error) => {
+                            showNotification('خطا: ' + error.message, 'error');
+                            resolve({ success: false, message: error.message });
+                        })
+                        .processRequest(data);
+                });
+            } catch (error) {
+                console.error('خطا:', error);
+                showNotification('خطا در ارتباط با سرور', 'error');
+                return { success: false, message: error.message };
+            }
+        }
+
+        // 🧑‍🍳 ورود فروشنده
+        async function handleStallLogin() {
+            const code = document.getElementById('stallCode').value.trim();
+            const password = document.getElementById('stallPassword').value.trim();
+
+            if (!code || !password) {
+                showNotification('لطفاً تمام فیلدها را پر کنید', 'error');
+                return;
+            }
+
+            const result = await sendRequest({
+                type: 'stallLogin',
+                code: code,
+                password: password
+            });
+
+            if (result.success) {
+                currentStallCode = result.code;
+                currentStallName = result.name;
+                document.getElementById('stallNameDisplay').textContent = result.name;
+                showPanel('panelStallDashboard');
+                showNotification('خوش آمدید!');
+            } else {
+                showNotification(result.message || 'کد یا رمز عبور اشتباه است', 'error');
+            }
+        }
+
+        // 👨‍💼 ورود مدیر
+        async function handleAdminLogin() {
+            const password = document.getElementById('adminPassword').value.trim();
+
+            if (!password) {
+                showNotification('لطفاً رمز عبور را وارد کنید', 'error');
+                return;
+            }
+
+            const result = await sendRequest({
+                type: 'adminLogin',
+                password: password
+            });
+
+            if (result.success) {
+                showPanel('panelAdminDashboard');
+                loadStats();
+                showNotification('خوش آمدید مدیر گرامی!');
+            } else {
+                showNotification('رمز عبور اشتباه است', 'error');
+            }
+        }
+
+        // 🔍 جستجوی دانش‌آموز
+        async function searchStudent() {
+            const query = document.getElementById('studentSearch').value.trim();
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (query.length < 2) {
+                resultsDiv.classList.remove('active');
+                return;
+            }
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                const result = await sendRequest({
+                    type: 'searchStudent',
+                    query: query
+                });
+
+                if (result.success && result.students.length > 0) {
+                    resultsDiv.innerHTML = result.students.map(s => `
+                        <div class="search-item" onclick='selectStudent(${JSON.stringify(s)})'>
+                            <strong>${s.name}</strong> - کد: ${s.code} - کلاس: ${s.class}
+                        </div>
+                    `).join('');
+                    resultsDiv.classList.add('active');
+                } else {
+                    resultsDiv.innerHTML = '<div class="search-item">دانش‌آموزی یافت نشد</div>';
+                    resultsDiv.classList.add('active');
+                }
+            }, 300);
+        }
+
+        // ✅ انتخاب دانش‌آموز
+        function selectStudent(student) {
+            selectedStudentData = student;
+            document.getElementById('studentSearch').value = `${student.name} (${student.code})`;
+            document.getElementById('searchResults').classList.remove('active');
+            showNotification(`دانش‌آموز "${student.name}" انتخاب شد`, 'success');
+        }
+
+        // 💰 ثبت فروش
+        async function submitSale() {
+            if (!selectedStudentData) {
+                showNotification('ابتدا دانش‌آموز را جستجو و انتخاب کنید', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('saleAmount').value;
+            const paymentType = document.getElementById('paymentType').value;
+            const description = document.getElementById('saleDescription').value.trim();
+
+            if (!amount || amount <= 0) {
+                showNotification('مبلغ را وارد کنید', 'error');
+                return;
+            }
+
+            if (!description) {
+                showNotification('شرح اقلام را وارد کنید', 'error');
+                return;
+            }
+
+            const result = await sendRequest({
+                type: 'submitSale',
+                studentCode: selectedStudentData.code,
+                studentName: selectedStudentData.name,
+                stallCode: currentStallCode,
+                stallName: currentStallName,
+                amount: parseFloat(amount),
+                paymentType: paymentType,
+                description: description
+            });
+
+            if (result.success) {
+                showNotification('فروش با موفقیت ثبت شد! ✅');
+                
+                // پاک کردن فرم
+                document.getElementById('studentSearch').value = '';
+                document.getElementById('saleAmount').value = '';
+                document.getElementById('saleDescription').value = '';
+                document.getElementById('paymentType').value = 'نقد';
+                selectedStudentData = null;
+            } else {
+                showNotification('خطا در ثبت فروش', 'error');
+            }
+        }
+
+        // 🔄 تغییر تب فروشنده
+        function switchStallTab(tabName) {
+            document.querySelectorAll('#panelStallDashboard .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#panelStallDashboard .tab-content').forEach(c => c.style.display = 'none');
+
+            if (tabName === 'new-sale') {
+                document.querySelector('[onclick="switchStallTab(\'new-sale\')"]').classList.add('active');
+                document.getElementById('stallTabNewSale').style.display = 'block';
+            } else if (tabName === 'history') {
+                document.querySelector('[onclick="switchStallTab(\'history\')"]').classList.add('active');
+                document.getElementById('stallTabHistory').style.display = 'block';
+                loadStallHistory();
+            }
+        }
+
+        // 📜 تاریخچه فروش غرفه
+        async function loadStallHistory() {
+            document.getElementById('historyLoading').classList.add('active');
+            
+            const result = await sendRequest({
+                type: 'getStallSales',
+                stallCode: currentStallCode
+            });
+
+            document.getElementById('historyLoading').classList.remove('active');
+
+            if (result.success) {
+                const html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>تاریخ</th>
+                                <th>دانش‌آموز</th>
+                                <th>مبلغ</th>
+                                <th>نوع</th>
+                                <th>شرح</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.sales.map((s, i) => `
+                                <tr>
+                                    <td>${i + 1}</td>
+                                    <td>${s.date}</td>
+                                    <td>${s.studentName}</td>
+                                    <td>${s.amount.toLocaleString()} تومان</td>
+                                    <td>${s.paymentType === 'نقد' ? '💵' : '📝'} ${s.paymentType}</td>
+                                    <td>${s.description}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 20px; text-align: center; font-weight: bold;">
+                        جمع کل: ${result.total.toLocaleString()} تومان
+                    </p>
+                `;
+                document.getElementById('historyContent').innerHTML = html;
+            } else {
+                document.getElementById('historyContent').innerHTML = '<p style="text-align: center; color: #666;">هنوز فروشی ثبت نشده است</p>';
+            }
+        }
+
+        // 🔄 تغییر تب مدیر
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('#panelAdminDashboard .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#panelAdminDashboard .tab-content').forEach(c => c.style.display = 'none');
+
+            const tabs = {
+                'stats': () => {
+                    document.querySelector('[onclick="switchAdminTab(\'stats\')"]').classList.add('active');
+                    document.getElementById('adminTabStats').style.display = 'block';
+                    loadStats();
+                },
+                'students': () => {
+                    document.querySelector('[onclick="switchAdminTab(\'students\')"]').classList.add('active');
+                    document.getElementById('adminTabStudents').style.display = 'block';
+                },
+                'debtors': () => {
+                    document.querySelector('[onclick="switchAdminTab(\'debtors\')"]').classList.add('active');
+                    document.getElementById('adminTabDebtors').style.display = 'block';
+                    loadDebtors();
+                },
+                'sales': () => {
+                    document.querySelector('[onclick="switchAdminTab(\'sales\')"]').classList.add('active');
+                    document.getElementById('adminTabSales').style.display = 'block';
+                    loadAllSales();
+                }
+            };
+
+            if (tabs[tabName]) {
+                tabs[tabName]();
+            }
+        }
+
+        // 📊 آمار کلی
+        async function loadStats() {
+            document.getElementById('statsLoading').classList.add('active');
+            
+            const result = await sendRequest({
+                type: 'getStats'
+            });
+
+            document.getElementById('statsLoading').classList.remove('active');
+
+            if (result.success) {
+                const html = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                            <h3>کل فروش</h3>
+                            <p style="font-size: 1.5em; font-weight: bold; margin-top: 10px;">${result.totalSales.toLocaleString()} تومان</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                            <h3>فروش نقد</h3>
+                            <p style="font-size: 1.5em; font-weight: bold; margin-top: 10px;">${result.cashSales.toLocaleString()} تومان</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                            <h3>فروش نسیه</h3>
+                            <p style="font-size: 1.5em; font-weight: bold; margin-top: 10px;">${result.creditSales.toLocaleString()} تومان</p>
+                        </div>
+                    </div>
+
+                    <h3>آمار غرفه‌ها:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>نام غرفه</th>
+                                <th>تعداد فروش</th>
+                                <th>جمع فروش</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.stallStats.map(s => `
+                                <tr>
+                                    <td>${s.name}</td>
+                                    <td>${s.count}</td>
+                                    <td>${s.total.toLocaleString()} تومان</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('statsContent').innerHTML = html;
+            }
+        }
+
+        // 📝 بدهکاران
+        async function loadDebtors() {
+            document.getElementById('debtorsLoading').classList.add('active');
+            
+            const result = await sendRequest({
+                type: 'getDebtors'
+            });
+
+            document.getElementById('debtorsLoading').classList.remove('active');
+
+            if (result.success && result.debtors.length > 0) {
+                const html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>کد</th>
+                                <th>نام</th>
+                                <th>مجموع بدهی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.debtors.map(d => `
+                                <tr>
+                                    <td>${d.code}</td>
+                                    <td>${d.name}</td>
+                                    <td style="color: #ff6b6b; font-weight: bold;">${d.totalDebt.toLocaleString()} تومان</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 20px; text-align: center; font-weight: bold; font-size: 1.2em;">
+                        جمع کل بدهی: ${result.totalDebt.toLocaleString()} تومان
+                    </p>
+                `;
+                document.getElementById('debtorsContent').innerHTML = html;
+            } else {
+                document.getElementById('debtorsContent').innerHTML = '<p style="text-align: center; color: #666;">بدهکاری وجود ندارد! 🎉</p>';
+            }
+        }
+
+        // 📋 کل فروش‌ها
+        async function loadAllSales() {
+            document.getElementById('salesLoading').classList.add('active');
+            
+            const result = await sendRequest({
+                type: 'getAllSales'
+            });
+
+            document.getElementById('salesLoading').classList.remove('active');
+
+            if (result.success && result.sales.length > 0) {
+                const html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>تاریخ</th>
+                                <th>دانش‌آموز</th>
+                                <th>غرفه</th>
+                                <th>مبلغ</th>
+                                <th>نوع</th>
+                                <th>شرح</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.sales.map((s, i) => `
+                                <tr>
+                                    <td>${i + 1}</td>
+                                    <td>${s.date}</td>
+                                    <td>${s.studentName} (${s.studentCode})</td>
+                                    <td>${s.stallName}</td>
+                                    <td>${s.amount.toLocaleString()} تومان</td>
+                                    <td>${s.paymentType === 'نقد' ? '💵' : '📝'} ${s.paymentType}</td>
+                                    <td>${s.description}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('salesContent').innerHTML = html;
+            } else {
+                document.getElementById('salesContent').innerHTML = '<p style="text-align: center; color: #666;">فروشی ثبت نشده است</p>';
+            }
+        }
+
+        // 📤 آپلود Excel
+        async function uploadExcel() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) {
+                showNotification('لطفاً فایل Excel را انتخاب کنید', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+                    if (json.length < 2) {
+                        showNotification('فایل خالی است', 'error');
+                        return;
+                    }
+
+                    const students = json.slice(1).map(row => ({
+                        code: row[0]?.toString() || '',
+                        name: row[1]?.toString() || '',
+                        class: row[2]?.toString() || ''
+                    })).filter(s => s.code && s.name);
+
+                    const result = await sendRequest({
+                        type: 'uploadStudents',
+                        students: students
+                    });
+
+                    if (result.success) {
+                        showNotification(`${students.length} دانش‌آموز با موفقیت آپلود شد! ✅`);
+                        document.getElementById('excelFile').value = '';
+                    } else {
+                        showNotification('خطا در آپلود', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showNotification('خطا در خواندن فایل Excel', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 📥 دانلود Excel بدهکاران
+        async function downloadDebtorsExcel() {
+            const result = await sendRequest({
+                type: 'getDebtors'
+            });
+
+            if (result.success && result.debtors.length > 0) {
+                const data = result.debtors.map(d => ({
+                    'کد': d.code,
+                    'نام و نام خانوادگی': d.name,
+                    'مجموع بدهی': d.totalDebt
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'بدهکاران');
+                XLSX.writeFile(wb, `بدهکاران_${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.xlsx`);
+                
+                showNotification('فایل Excel دانلود شد! 📥');
+            } else {
+                showNotification('بدهکاری وجود ندارد', 'error');
+            }
+        }
+
+        // 📥 دانلود Excel کل فروش‌ها
+        async function downloadSalesExcel() {
+            const result = await sendRequest({
+                type: 'getAllSales'
+            });
+
+            if (result.success && result.sales.length > 0) {
+                const data = result.sales.map((s, i) => ({
+                    'ردیف': i + 1,
+                    'تاریخ': s.date,
+                    'ساعت': s.time,
+                    'کد دانش‌آموز': s.studentCode,
+                    'نام دانش‌آموز': s.studentName,
+                    'غرفه': s.stallName,
+                    'مبلغ': s.amount,
+                    'نوع پرداخت': s.paymentType,
+                    'شرح': s.description
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'فروش‌ها');
+                XLSX.writeFile(wb, `کل_فروش‌ها_${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.xlsx`);
+                
+                showNotification('فایل Excel دانلود شد! 📥');
+            } else {
+                showNotification('فروشی ثبت نشده است', 'error');
+            }
+        }
+
+        // 🚪 خروج
+        function logout() {
+            currentStallCode = '';
+            currentStallName = '';
+            selectedStudentData = null;
+            showPanel('panelSelector');
+            showNotification('با موفقیت خارج شدید');
+        }
+
+        // ⚠️ هشدار اولیه اگر URL تنظیم نشده
+        window.addEventListener('DOMContentLoaded', () => {
+            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                alert('⚠️ توجه: لطفاً ابتدا URL اسکریپت Google Apps را در کد تنظیم کنید!');
+            }
         });
-        
-        return await response.json();
-      } catch (error) {
-        showNotification('خطا در ارتباط با سرور', 'error');
-        return { success: false, message: error.message };
-      }
-    }
-
-    // ===== توابع غرفه‌دار =====
-
-    // ورود غرفه‌دار
-    async function stallLogin() {
-      const code = document.getElementById('stallCode').value.trim();
-      const password = document.getElementById('stallPassword').value.trim();
-      
-      if (!code || !password) {
-        showNotification('لطفاً تمام فیلدها را پر کنید', 'error');
-        return;
-      }
-      
-      const result = await sendRequest({
-        type: 'stallLogin',
-        code: code,
-        password: password
-      });
-      
-      if (result.success) {
-        currentStall = { code: result.code, name: result.name };
-        document.getElementById('stallNameDisplay').textContent = result.name;
-        showPanel('panelStall');
-        showNotification('خوش آمدید!');
-      } else {
-        showNotification(result.message, 'error');
-      }
-    }
-
-    // جستجوی دانش‌آموز
-    let searchTimeout;
-    async function searchStudent() {
-      clearTimeout(searchTimeout);
-      
-      const query = document.getElementById('studentSearch').value.trim();
-      const resultsDiv = document.getElementById('searchResults');
-      
-      if (query.length < 2) {
-        resultsDiv.classList.remove('show');
-        return;
-      }
-      
-      searchTimeout = setTimeout(async () => {
-        const result = await sendRequest({
-          type: 'searchStudent',
-          query: query
-        });
-        
-        if (result.success && result.students.length > 0) {
-          resultsDiv.innerHTML = result.students.map(s => `
-            <div class="search-item" onclick='selectStudent(${JSON.stringify(s)})'>
-              <strong>${s.name}</strong> - کد: ${s.code} - کلاس: ${s.class}
-            </div>
-          `).join('');
-          resultsDiv.classList.add('show');
-        } else {
-          resultsDiv.innerHTML = '<div class="search-item">نتیجه‌ای یافت نشد</div>';
-          resultsDiv.classList.add('show');
-        }
-      }, 300);
-    }
-
-    // انتخاب دانش‌آموز
-    function selectStudent(student) {
-      selectedStudentData = student;
-      document.getElementById('selectedStudent').value = `${student.name} (${student.code})`;
-      document.getElementById('searchResults').classList.remove('show');
-      document.getElementById('studentSearch').value = '';
-    }
-
-    // ثبت فروش
-    async function submitSale() {
-      if (!selectedStudentData) {
-        showNotification('لطفاً ابتدا دانش‌آموز را انتخاب کنید', 'error');
-        return;
-      }
-      
-      const amount = parseFloat(document.getElementById('saleAmount').value);
-      const paymentType = document.getElementById('paymentType').value;
-      const description = document.getElementById('saleDescription').value.trim();
-      
-      if (!amount || amount <= 0) {
-        showNotification('لطفاً مبلغ معتبر وارد کنید', 'error');
-        return;
-      }
-      
-      const result = await sendRequest({
-        type: 'submitSale',
-        studentCode: selectedStudentData.code,
-        studentName: selectedStudentData.name,
-        stallName: currentStall.name,
-        amount: amount,
-        paymentType: paymentType,
-        description: description
-      });
-      
-      if (result.success) {
-        showNotification('فروش با موفقیت ثبت شد');
-        
-        // پاک کردن فرم
-        selectedStudentData = null;
-        document.getElementById('selectedStudent').value = '';
-        document.getElementById('saleAmount').value = '';
-        document.getElementById('saleDescription').value = '';
-        document.getElementById('paymentType').value = 'نقد';
-      } else {
-        showNotification(result.message, 'error');
-      }
-    }
-
-    // بارگذاری فروش‌های غرفه
-    async
+    </script>
+</body>
+</html>
