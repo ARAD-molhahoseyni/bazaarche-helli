@@ -377,8 +377,7 @@
                 <strong>🔑 اطلاعات ورود نمونه:</strong><br>
                 • غرفه غذا: <code>FOOD1</code> / <code>food123</code><br>
                 • غرفه نوشیدنی: <code>DRINK1</code> / <code>drink123</code><br>
-                • غرفه تنقلات: <code>SNACK1</code> / <code>snack123</code><br>
-                • غرفه کتاب: <code>BOOK1</code> / <code>book123</code>
+                • غرفه بازی: <code>GAME1</code> / <code>game123</code>
             </div>
         </div>
 
@@ -498,8 +497,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
-        // 🔧 تنظیمات اولیه
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRWF_zCjD3fpVtinw5p-fiQjOezDOSLnMLQxlHWFdiHmQ0UNcNNAWem0C6pM37bJrP7w/exec'; // ⚠️ URL خود را اینجا قرار دهید
+        // 🔧 تنظیمات اولیه - فقط این URL را تغییر دهید
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRWF_zCjD3fpVtinw5p-fiQjOezDOSLnMLQxlHWFdiHmQ0UNcNNAWem0C6pM37bJrP7w/exec';
         
         let currentStall = null;
         let selectedStudentData = null;
@@ -547,7 +546,7 @@
                 return result;
             } catch (error) {
                 console.error('خطا در ارتباط با سرور:', error);
-                showNotification('خطا در ارتباط با سرور', 'error');
+                showNotification('خطا در ارتباط با سرور: ' + error.message, 'error');
                 return { success: false, message: 'خطا در ارتباط با سرور' };
             }
         }
@@ -999,10 +998,8 @@
 
         // 🎯 رویداد بارگذاری صفحه
         document.addEventListener('DOMContentLoaded', function() {
-            // بررسی URL Apps Script
-            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxRWF_zCjD3fpVtinw5p-fiQjOezDOSLnMLQxlHWFdiHmQ0UNcNNAWem0C6pM37bJrP7w/exec') {
-                showNotification('لطفاً URL Google Apps Script را در کد تنظیم کنید', 'error');
-            }
+            console.log('✅ سیستم آماده است');
+            console.log('📡 URL سرور:', SCRIPT_URL);
         });
 
         // مخفی کردن نتایج جستجو با کلیک روی صفحه
@@ -1014,5 +1011,3 @@
     </script>
 </body>
 </html>
-
-
