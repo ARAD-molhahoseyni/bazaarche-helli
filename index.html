@@ -428,11 +428,13 @@
 
     async function apiRequest(payload) {
       try {
+        const formData = new URLSearchParams(payload); // به‌جای JSON
+    
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: formData    // دیگه header نذار
         });
+    
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return await res.json();
       } catch (err) {
@@ -441,6 +443,7 @@
         return { success: false };
       }
     }
+
 
     async function stallLogin(e) {
       e.preventDefault();
@@ -768,6 +771,7 @@
   </script>
 </body>
 </html>
+
 
 
 
