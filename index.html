@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> 10سیستم مدیریت بازارچه | دبیرستان علامه حلی</title>
+  <title>سیستم مدیریت بازارچه | دبیرستان علامه حلی10</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -393,28 +393,28 @@
 
   <div id="toastContainer" class="toast-container"></div>
 
- <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyjXaEH0BS2Vi278xXx-u1_vk2AnpgvnkN34XIzNJI1KaBzTDkmwMZiJTtgZtUFTs44wQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxabzFbbZrB8XT6cUjZiFvAxcSvgCQTECTAKKCwifp_UFVcU0WMlaFyTRPlNiKpuSD33Q/exec';
 
     const state = {
-      stall: null,
+      booth: null,
       selectedStudent: null,
       debounceTimer: null,
       debtors: [],
       allSales: []
     };
 
-    const toastContainer = document.getElementById('toastContainer');
-
     function showPanel(id) {
-      document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(panel => panel.style.display = 'none');
+      document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.remove('active');
+        panel.style.display = 'none';
+      });
       const target = document.getElementById(id);
       if (target) {
-        target.style.display = ['entryScreen'].includes(id) ? '' : 'block';
-        requestAnimationFrame(() => target.classList.add('active'));
+        target.style.display = id === 'entryScreen' ? '' : 'block';
+        setTimeout(() => target.classList.add('active'), 10);
       }
     }
 
@@ -422,30 +422,43 @@
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
-      toastContainer.appendChild(toast);
+      document.getElementById('toastContainer').appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
     }
 
     async function apiRequest(data) {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
-      const text = await response.text();
-      return JSON.parse(text);
+      try {
+        console.log('📤 Request:', data);
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(data)
+        });
+        const text = await response.text();
+        console.log('📥 Response:', text);
+        return JSON.parse(text);
+      } catch (error) {
+        console.error('❌ API Error:', error);
+        showToast('خطا در ارتباط با سرور', 'error');
+        return { success: false, message: error.message };
+      }
     }
-
 
     async function stallLogin(e) {
       e.preventDefault();
-      const code = document.getElementById('stallCode').value.trim();
+      const boothCode = document.getElementById('stallCode').value.trim();
       const password = document.getElementById('stallPassword').value.trim();
 
-      const res = await apiRequest({ action: 'stallLogin', code, password });
+      const res = await apiRequest({ 
+        action: 'login',
+        role: 'seller',
+        boothCode,
+        password
+      });
+
       if (res.success) {
-        state.stall = res.stall;
-        document.getElementById('stallWelcome').textContent = `🧑‍🍳 ${res.stall.name}`;
-        document.getElementById('stallInfo').textContent = `کد غرفه: ${res.stall.code}`;
+        state.booth = { code: boothCode, name: res.boothName };
+        document.getElementById('stallWelcome').textContent = `🧑‍🍳 ${res.boothName}`;
+        document.getElementById('stallInfo').textContent = `کد غرفه: ${boothCode}`;
         showPanel('stallPanel');
         await refreshStallData();
         showToast('ورود موفقیت‌آمیز بود');
@@ -457,7 +470,13 @@
     async function adminLogin(e) {
       e.preventDefault();
       const password = document.getElementById('adminPassword').value.trim();
-      const res = await apiRequest({ type: 'adminLogin', password });
+      
+      const res = await apiRequest({ 
+        action: 'login',
+        role: 'admin',
+        password
+      });
+
       if (res.success) {
         showPanel('adminPanel');
         loadAdminStats();
@@ -476,21 +495,21 @@
     async function searchStudent() {
       const query = document.getElementById('studentSearch').value.trim();
       const resultsBox = document.getElementById('searchResults');
+      
       if (query.length < 2) {
         resultsBox.style.display = 'none';
         return;
       }
 
-      const res = await apiRequest({ type: 'searchStudent', query });
-      if (!res.success) return;
-
-      if (!res.students.length) {
+      const res = await apiRequest({ action: 'searchStudent', query });
+      
+      if (!res.success || !res.students.length) {
         resultsBox.innerHTML = '<div class="search-item">نتیجه‌ای یافت نشد</div>';
       } else {
-        resultsBox.innerHTML = res.students.map(
-          s => `<div class="search-item" onclick="selectStudent('${s.code}', '${s.name}', '${s.class}')">
-                  <strong>${s.name}</strong> | ${s.class} | ${s.code}
-                </div>`
+        resultsBox.innerHTML = res.students.map(s => 
+          `<div class="search-item" onclick="selectStudent('${s.code}', '${s.name}', '${s.class}')">
+            <strong>${s.name}</strong> | ${s.class} | ${s.code}
+          </div>`
         ).join('');
       }
       resultsBox.style.display = 'block';
@@ -504,33 +523,41 @@
     }
 
     async function submitSale() {
-      if (!state.stall) return;
+      if (!state.booth) {
+        showToast('لطفاً ابتدا وارد شوید', 'error');
+        return;
+      }
+      
       if (!state.selectedStudent) {
         showToast('لطفاً دانش‌آموز را انتخاب کنید', 'error');
         return;
       }
+
       const amount = Number(document.getElementById('saleAmount').value);
       const paymentType = document.getElementById('paymentType').value;
       const description = document.getElementById('saleDescription').value.trim();
 
-      if (!amount || amount <= 0 || !description) {
-        showToast('مبلغ و شرح الزامی هستند', 'error');
+      if (!amount || amount <= 0) {
+        showToast('مبلغ باید بیشتر از صفر باشد', 'error');
+        return;
+      }
+
+      if (!description) {
+        showToast('شرح اقلام الزامی است', 'error');
         return;
       }
 
       const res = await apiRequest({
-        type: 'submitSale',
+        action: 'submitSale',
+        boothCode: state.booth.code,
         studentCode: state.selectedStudent.code,
-        studentName: state.selectedStudent.name,
-        stallName: state.stall.name,
-        stallCode: state.stall.code,
         amount,
         paymentType,
         description
       });
 
       if (res.success) {
-        showToast('فروش ثبت شد');
+        showToast('فروش با موفقیت ثبت شد');
         document.getElementById('saleAmount').value = '';
         document.getElementById('saleDescription').value = '';
         document.getElementById('selectedStudent').value = '';
@@ -542,45 +569,58 @@
     }
 
     async function refreshStallData() {
-      await Promise.all([loadStallReport(), loadStallSales()]);
+      await Promise.all([loadBoothReport(), loadBoothSales()]);
     }
 
-    async function loadStallReport() {
-      if (!state.stall) return;
-      const res = await apiRequest({ type: 'getStallReport', stallName: state.stall.name });
+    async function loadBoothReport() {
+      if (!state.booth) return;
+      
+      const res = await apiRequest({ 
+        action: 'getBoothReport',
+        boothCode: state.booth.code
+      });
+
       if (!res.success) return;
 
-      const rpt = res.report;
-      const template = [
-        { label: 'فروش نقدی کل', value: rpt.totalCash },
-        { label: 'بدهی کل', value: rpt.totalDebt },
-        { label: 'فروش نقدی امروز', value: rpt.todayCash },
-        { label: 'بدهی‌های امروز', value: rpt.todayDebt },
-        { label: 'تعداد فروش نقدی', value: rpt.totalCashCount },
-        { label: 'تعداد فروش نسیه', value: rpt.totalDebtCount }
-      ];
-      document.getElementById('stallStats').innerHTML = template.map(card => `
+      document.getElementById('stallStats').innerHTML = `
         <div class="stat-card">
-          <div class="stat-title">${card.label}</div>
-          <div class="stat-value">${Number(card.value || 0).toLocaleString('fa-IR')}</div>
+          <div class="stat-title">فروش نقدی</div>
+          <div class="stat-value">${Number(res.totalCash || 0).toLocaleString('fa-IR')}</div>
         </div>
-      `).join('');
+        <div class="stat-card">
+          <div class="stat-title">فروش نسیه</div>
+          <div class="stat-value">${Number(res.totalCredit || 0).toLocaleString('fa-IR')}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">مجموع فروش</div>
+          <div class="stat-value">${Number(res.totalAmount || 0).toLocaleString('fa-IR')}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">تعداد تراکنش</div>
+          <div class="stat-value">${Number(res.totalSales || 0).toLocaleString('fa-IR')}</div>
+        </div>
+      `;
     }
 
-    async function loadStallSales() {
-      if (!state.stall) return;
-      const res = await apiRequest({ type: 'getStallSales', stallName: state.stall.name });
+    async function loadBoothSales() {
+      if (!state.booth) return;
+      
+      const res = await apiRequest({ 
+        action: 'getBoothSales',
+        boothCode: state.booth.code
+      });
+
       if (!res.success) return;
 
       const rows = res.sales.map(sale => `
         <tr>
-          <td>${sale.date}</td>
           <td>${sale.time}</td>
           <td>${sale.studentName}</td>
+          <td>${sale.class}</td>
           <td>${Number(sale.amount).toLocaleString('fa-IR')} تومان</td>
           <td>
-            <span class="badge ${sale.paymentType === 'نقد' ? 'cash' : 'debt'}">
-              ${sale.paymentType === 'نقد' ? '💰 نقد' : '📝 نسیه'}
+            <span class="badge ${sale.type === 'نقد' ? 'cash' : 'debt'}">
+              ${sale.type === 'نقد' ? '💰 نقد' : '📝 نسیه'}
             </span>
           </td>
           <td>${sale.description}</td>
@@ -590,7 +630,7 @@
       document.getElementById('stallSalesTable').innerHTML = `
         <table>
           <thead>
-            <tr><th>تاریخ</th><th>ساعت</th><th>دانش‌آموز</th><th>مبلغ</th><th>نوع پرداخت</th><th>شرح</th></tr>
+            <tr><th>ساعت</th><th>دانش‌آموز</th><th>کلاس</th><th>مبلغ</th><th>نوع</th><th>شرح</th></tr>
           </thead>
           <tbody>
             ${rows || '<tr><td colspan="6">تراکنشی ثبت نشده است</td></tr>'}
@@ -600,88 +640,129 @@
     }
 
     async function loadAdminStats() {
-      const res = await apiRequest({ type: 'getStats' });
+      const res = await apiRequest({ action: 'getDashboard' });
+      
       if (!res.success) return;
-      const stats = res.stats;
-      const cards = [
-        { label: 'کل فروش (تومان)', value: stats.totalSales },
-        { label: 'تعداد تراکنش', value: stats.totalTransactions },
-        { label: 'تعداد دانش‌آموزان', value: stats.totalStudents },
-        { label: 'کل بدهی (تومان)', value: stats.totalDebt }
-      ];
-      document.getElementById('adminStats').innerHTML = cards.map(card => `
-        <div class="stat-card">
-          <div class="stat-title">${card.label}</div>
-          <div class="stat-value">${Number(card.value || 0).toLocaleString('fa-IR')}</div>
-        </div>
-      `).join('');
-      loadStallStats();
-    }
 
-    async function loadStallStats() {
-      const res = await apiRequest({ type: 'getStallStats' });
-      if (!res.success) return;
-      const maxTotal = Math.max(...res.stats.map(s => s.total), 1);
-      document.getElementById('adminStallStats').innerHTML = res.stats.map(stat => `
+      // محاسبه آمار کلی
+      let totalCash = 0;
+      let totalCredit = 0;
+      let totalCount = 0;
+
+      res.booths.forEach(booth => {
+        totalCash += booth.cash;
+        totalCredit += booth.credit;
+        totalCount += booth.count;
+      });
+
+      document.getElementById('adminStats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-title">کل فروش نقدی</div>
+          <div class="stat-value">${Number(totalCash).toLocaleString('fa-IR')}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">کل فروش نسیه</div>
+          <div class="stat-value">${Number(totalCredit).toLocaleString('fa-IR')}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">مجموع کل</div>
+          <div class="stat-value">${Number(totalCash + totalCredit).toLocaleString('fa-IR')}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">تعداد تراکنش</div>
+          <div class="stat-value">${Number(totalCount).toLocaleString('fa-IR')}</div>
+        </div>
+      `;
+
+      // آمار غرفه‌ها
+      const maxTotal = Math.max(...res.booths.map(b => b.total), 1);
+      document.getElementById('adminStallStats').innerHTML = res.booths.map(booth => `
         <div style="margin-bottom:16px;">
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-            <strong>${stat.name}</strong>
-            <div>${Number(stat.total).toLocaleString('fa-IR')} تومان (${stat.transactions} تراکنش)</div>
+            <strong>${booth.name} (${booth.code})</strong>
+            <div>${Number(booth.total).toLocaleString('fa-IR')} تومان (${booth.count} تراکنش)</div>
           </div>
           <div style="background:rgba(148,163,184,0.2); height:10px; border-radius:999px; overflow:hidden;">
-            <div style="height:100%; width:${(stat.total / maxTotal) * 100}%; background:linear-gradient(90deg,#2563eb,#38bdf8);"></div>
+            <div style="height:100%; width:${(booth.total / maxTotal) * 100}%; background:linear-gradient(90deg,#2563eb,#38bdf8);"></div>
+          </div>
+          <div style="font-size:0.85rem; color:#cbd5f5; margin-top:4px;">
+            💰 نقد: ${Number(booth.cash).toLocaleString('fa-IR')} | 📝 نسیه: ${Number(booth.credit).toLocaleString('fa-IR')}
           </div>
         </div>
       `).join('');
     }
 
     async function loadDebtors() {
-      const res = await apiRequest({ type: 'getDebtors' });
+      const res = await apiRequest({ action: 'getDebtors' });
+      
       if (!res.success) return;
+      
       state.debtors = res.debtors;
-      renderTable('debtorsTable', res.debtors, ['code','name','class','totalDebt','count'], ['کد','نام','کلاس','مجموع بدهی','تعداد نسیه'], row => `
-        <td>${row.code}</td>
-        <td>${row.name}</td>
-        <td>${row.class}</td>
-        <td>${Number(row.totalDebt).toLocaleString('fa-IR')} تومان</td>
-        <td>${row.count}</td>
-      `);
+
+      const rows = res.debtors.map(d => `
+        <tr>
+          <td>${d.code}</td>
+          <td>${d.name}</td>
+          <td>${d.class}</td>
+          <td>${Number(d.debt).toLocaleString('fa-IR')} تومان</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('debtorsTable').innerHTML = `
+        <table>
+          <thead>
+            <tr><th>کد</th><th>نام</th><th>کلاس</th><th>بدهی</th></tr>
+          </thead>
+          <tbody>
+            ${rows || '<tr><td colspan="4">بدهکاری وجود ندارد</td></tr>'}
+          </tbody>
+        </table>
+      `;
     }
 
     async function loadAllSales() {
-      const res = await apiRequest({ type: 'getAllSales' });
+      const res = await apiRequest({ action: 'getAllSales' });
+      
       if (!res.success) return;
+      
       state.allSales = res.sales;
-      renderTable('allSalesTable', res.sales, [], ['تاریخ','ساعت','دانش‌آموز','غرفه','مبلغ','نوع پرداخت','شرح'], row => `
-        <td>${row.date}</td>
-        <td>${row.time}</td>
-        <td>${row.studentName}</td>
-        <td>${row.stallName}</td>
-        <td>${Number(row.amount).toLocaleString('fa-IR')} تومان</td>
-        <td>
-          <span class="badge ${row.paymentType === 'نقد' ? 'cash' : 'debt'}">
-            ${row.paymentType === 'نقد' ? '💰 نقد' : '📝 نسیه'}
-          </span>
-        </td>
-        <td>${row.description}</td>
-      `);
-    }
 
-    function renderTable(containerId, rows, _, headers, rowTemplate) {
-      const body = rows.length
-        ? rows.map(rowTemplate).join('')
-        : `<tr><td colspan="${headers.length}">داده‌ای وجود ندارد</td></tr>`;
-      document.getElementById(containerId).innerHTML = `
+      const rows = res.sales.map(s => `
+        <tr>
+          <td>${s.date}</td>
+          <td>${s.time}</td>
+          <td>${s.studentName}</td>
+          <td>${s.booth}</td>
+          <td>${Number(s.amount).toLocaleString('fa-IR')} تومان</td>
+          <td>
+            <span class="badge ${s.type === 'نقد' ? 'cash' : 'debt'}">
+              ${s.type === 'نقد' ? '💰 نقد' : '📝 نسیه'}
+            </span>
+          </td>
+          <td>${s.description}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('allSalesTable').innerHTML = `
         <table>
-          <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-          <tbody>${body}</tbody>
+          <thead>
+            <tr><th>تاریخ</th><th>ساعت</th><th>دانش‌آموز</th><th>غرفه</th><th>مبلغ</th><th>نوع</th><th>شرح</th></tr>
+          </thead>
+          <tbody>
+            ${rows || '<tr><td colspan="7">تراکنشی ثبت نشده است</td></tr>'}
+          </tbody>
         </table>
       `;
     }
 
     function showAdminTab(id) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === id));
-      document.querySelectorAll('.admin-tab').forEach(tab => tab.style.display = tab.id === id ? 'block' : 'none');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === id);
+      });
+      document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.style.display = tab.id === id ? 'block' : 'none';
+      });
+      
       if (id === 'debtorsTab') loadDebtors();
       if (id === 'allSalesTab') loadAllSales();
     }
@@ -693,8 +774,8 @@
       }
       const wb = XLSX.utils.book_new();
       const data = [
-        ['کد', 'نام', 'کلاس', 'مجموع بدهی', 'تعداد خرید نسیه'],
-        ...state.debtors.map(d => [d.code, d.name, d.class, d.totalDebt, d.count])
+        ['کد', 'نام', 'کلاس', 'بدهی'],
+        ...state.debtors.map(d => [d.code, d.name, d.class, d.debt])
       ];
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Debtors');
       XLSX.writeFile(wb, `debtors_${new Date().toLocaleDateString('fa-IR')}.xlsx`);
@@ -707,8 +788,8 @@
       }
       const wb = XLSX.utils.book_new();
       const data = [
-        ['تاریخ', 'ساعت', 'دانش‌آموز', 'غرفه', 'مبلغ', 'نوع پرداخت', 'شرح'],
-        ...state.allSales.map(s => [s.date, s.time, s.studentName, s.stallName, s.amount, s.paymentType, s.description])
+        ['تاریخ', 'ساعت', 'دانش‌آموز', 'غرفه', 'مبلغ', 'نوع', 'شرح'],
+        ...state.allSales.map(s => [s.date, s.time, s.studentName, s.booth, s.amount, s.type, s.description])
       ];
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Sales');
       XLSX.writeFile(wb, `sales_${new Date().toLocaleDateString('fa-IR')}.xlsx`);
@@ -717,19 +798,34 @@
     function handleStudentsUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
+      
       const reader = new FileReader();
       reader.onload = async e => {
         try {
           const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }).slice(1).filter(r => r[0] && r[1]);
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+            .slice(1)
+            .filter(r => r[0] && r[1]);
+          
           if (!rows.length) {
             showToast('فایل خالی یا نامعتبر است', 'error');
             return;
           }
-          const res = await apiRequest({ type: 'uploadStudents', students: rows });
+
+          const students = rows.map(r => ({
+            code: r[0],
+            name: r[1],
+            class: r[2]
+          }));
+
+          const res = await apiRequest({ 
+            action: 'uploadStudents',
+            students
+          });
+
           if (res.success) {
-            showToast(`${rows.length} دانش‌آموز بارگذاری شد`);
+            showToast(res.message);
             loadAdminStats();
           } else {
             showToast(res.message || 'خطا در آپلود', 'error');
@@ -743,13 +839,13 @@
     }
 
     function logout() {
-      state.stall = null;
+      state.booth = null;
       state.selectedStudent = null;
       document.getElementById('stallCode').value = '';
       document.getElementById('stallPassword').value = '';
       document.getElementById('adminPassword').value = '';
       showPanel('entryScreen');
-      showToast('خروج انجام شد', 'success');
+      showToast('خروج انجام شد');
     }
 
     document.addEventListener('click', evt => {
@@ -762,26 +858,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
