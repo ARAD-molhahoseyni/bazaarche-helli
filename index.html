@@ -427,44 +427,13 @@
     }
 
     async function apiRequest(data) {
-        try {
-            console.log('📤 Sending request:', data);
-            
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                redirect: 'follow',
-                body: JSON.stringify(data)  // ⚠️ این خط حیاتی است!
-            });
-    
-            console.log('📥 Response status:', response.status);
-            
-            const text = await response.text();
-            console.log('📥 Response text:', text);
-            
-            // بررسی اینکه آیا پاسخ JSON است
-            let result;
-            try {
-                result = JSON.parse(text);
-            } catch (e) {
-                console.error('❌ Invalid JSON response:', text);
-                throw new Error('پاسخ سرور نامعتبر است. لطفاً URL را بررسی کنید.');
-            }
-    
-            console.log('✅ Parsed result:', result);
-            return result;
-    
-        } catch (error) {
-            console.error('❌ API Error:', error);
-            alert('خطا در ارتباط با سرور:\n' + error.message);
-            throw error;
-        }
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      const text = await response.text();
+      return JSON.parse(text);
     }
-
 
 
     async function stallLogin(e) {
@@ -793,6 +762,7 @@
   </script>
 </body>
 </html>
+
 
 
 
