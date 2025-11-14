@@ -396,7 +396,7 @@
  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwlI39_xEH0tj5eURoKHtYUlEYL6Em6JsKQcTknkqtnCcnGwyEBDcGvmcNLS6FC3v6meg/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxfIqWRJSFzbJEqg0WFBYzWoI90CD_B6z_XgRPxEfI7j4qABHqwrGb7m4ePYeDOaGZ87Q/exec';
 
     const state = {
       stall: null,
@@ -441,7 +441,7 @@
       const code = document.getElementById('stallCode').value.trim();
       const password = document.getElementById('stallPassword').value.trim();
 
-      const res = await apiRequest({ type: 'stallLogin', code, password });
+      const res = await apiRequest({ action: 'stallLogin', code, password });
       if (res.success) {
         state.stall = res.stall;
         document.getElementById('stallWelcome').textContent = `🧑‍🍳 ${res.stall.name}`;
@@ -762,6 +762,7 @@
   </script>
 </body>
 </html>
+
 
 
 
