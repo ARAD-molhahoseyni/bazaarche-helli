@@ -415,12 +415,12 @@
     
     let currentBoothCode = '';
     let currentBoothName = '';
-
+  
     function showPanel(panelId) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.getElementById(panelId).classList.add('active');
     }
-
+  
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
@@ -429,30 +429,45 @@
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
     }
-
+  
+    // ✅ تابع apiCall اصلاح‌شده
     async function apiCall(action, data = {}) {
       try {
+        const formData = new FormData();
+        formData.append('action', action);
+        
+        Object.keys(data).forEach(key => {
+          if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key]);
+          }
+        });
+        
         const response = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ action, ...data })
+          body: formData
         });
+        
         return await response.json();
       } catch (error) {
         showToast('خطا در ارتباط با سرور', 'error');
         throw error;
       }
     }
-
+  
     async function stallLogin(e) {
       e.preventDefault();
       const boothCode = document.getElementById('stallCode').value.trim();
       const password = document.getElementById('stallPassword').value;
-
-      const result = await apiCall('login', { role: 'seller', boothCode, password });
+  
+      const result = await apiCall('login', {
+        username: boothCode,
+        password: password,
+        role: 'vendor'
+      });
       
       if (result.success) {
-        currentBoothCode = boothCode;
-        currentBoothName = result.boothName;
+        currentBoothCode = result.data.vendorCode;
+        currentBoothName = result.data.vendorName;
         document.getElementById('boothNameDisplay').textContent = currentBoothName;
         showPanel('stallPanel');
         refreshStallData();
@@ -461,12 +476,16 @@
         showToast(result.message, 'error');
       }
     }
-
+  
     async function adminLogin(e) {
       e.preventDefault();
       const password = document.getElementById('adminPassword').value;
-
-      const result = await apiCall('login', { role: 'admin', password });
+  
+      const result = await apiCall('login', {
+        username: 'admin',
+        password: password,
+        role: 'admin'
+      });
       
       if (result.success) {
         showPanel('adminPanel');
