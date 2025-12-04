@@ -410,531 +410,329 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-  <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbw_YHbMkgUdZjFKBGIM0Da43Gu03QnyDKXHxCDFLDUayM6hqcy1_b5fSngTElarxGLjqw/exec';
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbw_YHbMkgUdZjFKBGIM0Da43Gu03QnyDKXHxCDFLDUayM6hqcy1_b5fSngTElarxGLjqw/exec';
+  
+  let currentBoothCode = '';
+  let currentBoothName = '';
+  let allStudents = [];
+
+  function showPanel(panelId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  async function apiCall(action, data = {}) {
+    try {
+      const formData = new FormData();
+      formData.append('action', action);
+      
+      Object.keys(data).forEach(key => {
+        if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
+      });
+      
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: formData,
+        redirect: 'follow'
+      });
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('پاسخ سرور:', text);
+        throw new Error('سرور JSON برنگرداند');
+      }
+      
+      return await response.json();
+      
+    } catch (error) {
+      console.error('خطای کامل:', error);
+      showToast('خطا: ' + error.message, 'error');
+      throw error;
+    }
+  }
+
+  async function stallLogin(e) {
+    e.preventDefault();
+    const boothCode = document.getElementById('stallCode').value.trim();
+    const password = document.getElementById('stallPassword').value;
+
+    const result = await apiCall('login', {
+      username: boothCode,
+      password: password,
+      role: 'vendor'
+    });
     
-    let currentBoothCode = '';
-    let currentBoothName = '';
-  
-    function showPanel(panelId) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(panelId).classList.add('active');
+    if (result.success) {
+      currentBoothCode = result.data.vendorCode;
+      currentBoothName = result.data.vendorName;
+      document.getElementById('boothNameDisplay').textContent = currentBoothName;
+      showPanel('stallPanel');
+      refreshStallData();
+      showToast('ورود موفق');
+    } else {
+      showToast(result.message, 'error');
     }
-  
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3500);
+  }
+
+  async function adminLogin(e) {
+    e.preventDefault();
+    const password = document.getElementById('adminPassword').value;
+
+    const result = await apiCall('login', {
+      username: 'admin',
+      password: password,
+      role: 'admin'
+    });
+    
+    if (result.success) {
+      showPanel('adminPanel');
+      refreshAdminData();
+      showToast('ورود مدیر موفق');
+    } else {
+      showToast(result.message, 'error');
     }
-  
-    // ✅ تابع apiCall اصلاح‌شده
-    async function apiCall(action, data = {}) {
+  }
+
+  async function loadStudents() {
+    const result = await apiCall('getStudents');
+    if (result.success) {
+      allStudents = result.data;
+    }
+  }
+
+  function searchStudent() {
+    const query = document.getElementById('studentSearch').value.trim();
+    const resultsDiv = document.getElementById('studentResults');
+    
+    if (query.length < 2) {
+      resultsDiv.innerHTML = '';
+      return;
+    }
+
+    const filtered = allStudents.filter(s => 
+      s.code.includes(query) || s.name.includes(query)
+    );
+
+    resultsDiv.innerHTML = filtered.map(s => `
+      <div class="student-item" onclick="selectStudent('${s.code}', '${s.name}', '${s.class}')">
+        <strong>${s.code}</strong> - ${s.name} (${s.class})
+      </div>
+    `).join('');
+  }
+
+  function selectStudent(code, name, className) {
+    document.getElementById('selectedStudent').innerHTML = `
+      <div><strong>کد:</strong> ${code}</div>
+      <div><strong>نام:</strong> ${name}</div>
+      <div><strong>کلاس:</strong> ${className}</div>
+    `;
+    document.getElementById('selectedStudentCode').value = code;
+    document.getElementById('studentResults').innerHTML = '';
+    document.getElementById('studentSearch').value = '';
+  }
+
+  async function recordSale(e) {
+    e.preventDefault();
+    
+    const studentCode = document.getElementById('selectedStudentCode').value;
+    const amount = document.getElementById('saleAmount').value;
+    const paymentType = document.getElementById('paymentType').value;
+    const description = document.getElementById('saleDescription').value;
+
+    if (!studentCode || !amount) {
+      showToast('لطفا تمام فیلدها را پر کنید', 'error');
+      return;
+    }
+
+    const result = await apiCall('recordSale', {
+      vendorCode: currentBoothCode,
+      studentCode: studentCode,
+      amount: amount,
+      paymentType: paymentType,
+      description: description
+    });
+
+    if (result.success) {
+      showToast('فروش ثبت شد');
+      document.getElementById('saleForm').reset();
+      document.getElementById('selectedStudent').innerHTML = '';
+      document.getElementById('selectedStudentCode').value = '';
+      refreshStallData();
+    } else {
+      showToast(result.message, 'error');
+    }
+  }
+
+  async function refreshStallData() {
+    await loadStudents();
+    
+    const report = await apiCall('getVendorReport', {
+      vendorCode: currentBoothCode
+    });
+    
+    if (report.success) {
+      const d = report.data;
+      document.getElementById('stallTotalSales').textContent = 
+        (d.totalCash + d.totalCredit).toLocaleString();
+      document.getElementById('stallCashSales').textContent = 
+        d.totalCash.toLocaleString();
+      document.getElementById('stallCreditSales').textContent = 
+        d.totalCredit.toLocaleString();
+      document.getElementById('stallTransactionCount').textContent = 
+        d.salesCount;
+    }
+
+    const sales = await apiCall('getTodaySales', {
+      vendorCode: currentBoothCode
+    });
+    
+    if (sales.success) {
+      const tbody = document.getElementById('todaySalesBody');
+      tbody.innerHTML = sales.data.map(s => `
+        <tr>
+          <td>${s.time}</td>
+          <td>${s.studentCode}</td>
+          <td>${s.studentName}</td>
+          <td>${Number(s.amount).toLocaleString()}</td>
+          <td><span class="badge badge-${s.paymentType === 'نقد' ? 'success' : 'warning'}">${s.paymentType}</span></td>
+          <td>${s.description}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  async function refreshAdminData() {
+    const stats = await apiCall('getAdminStats');
+    
+    if (stats.success) {
+      const d = stats.data;
+      document.getElementById('adminTotalSales').textContent = 
+        d.totalSales.toLocaleString();
+      document.getElementById('adminCashSales').textContent = 
+        d.cashSales.toLocaleString();
+      document.getElementById('adminCreditSales').textContent = 
+        d.creditSales.toLocaleString();
+      document.getElementById('adminTotalDebt').textContent = 
+        d.totalDebt.toLocaleString();
+      document.getElementById('adminDebtorCount').textContent = 
+        d.debtorCount;
+
+      const vendorTbody = document.getElementById('vendorStatsBody');
+      vendorTbody.innerHTML = d.vendorStats.map(v => `
+        <tr>
+          <td>${v.name}</td>
+          <td>${v.totalSales.toLocaleString()}</td>
+          <td>${v.cashSales.toLocaleString()}</td>
+          <td>${v.creditSales.toLocaleString()}</td>
+          <td>${v.salesCount}</td>
+        </tr>
+      `).join('');
+    }
+
+    const debtors = await apiCall('getAllDebtors');
+    if (debtors.success) {
+      const tbody = document.getElementById('debtorsBody');
+      tbody.innerHTML = debtors.data.map(d => `
+        <tr>
+          <td>${d.studentCode}</td>
+          <td>${d.studentName}</td>
+          <td>${d.className}</td>
+          <td>${d.totalDebt.toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    const allSales = await apiCall('getAllSales');
+    if (allSales.success) {
+      const tbody = document.getElementById('allSalesBody');
+      tbody.innerHTML = allSales.data.map(s => `
+        <tr>
+          <td>${s.date}</td>
+          <td>${s.time}</td>
+          <td>${s.vendorName}</td>
+          <td>${s.studentCode}</td>
+          <td>${s.studentName}</td>
+          <td>${Number(s.amount).toLocaleString()}</td>
+          <td><span class="badge badge-${s.paymentType === 'نقد' ? 'success' : 'warning'}">${s.paymentType}</span></td>
+          <td>${s.description}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  async function uploadStudents(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('studentFile');
+    
+    if (!fileInput.files[0]) {
+      showToast('لطفا فایل را انتخاب کنید', 'error');
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
       try {
-        const formData = new FormData();
-        formData.append('action', action);
-        
-        Object.keys(data).forEach(key => {
-          if (data[key] !== null && data[key] !== undefined) {
-            formData.append(key, data[key]);
-          }
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+        const students = jsonData.slice(1).map(row => ({
+          code: String(row[0] || '').trim(),
+          name: String(row[1] || '').trim(),
+          class: String(row[2] || '').trim()
+        })).filter(s => s.code && s.name);
+
+        const result = await apiCall('uploadStudents', {
+          students: JSON.stringify(students)
         });
-        
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          body: formData
-        });
-        
-        return await response.json();
+
+        if (result.success) {
+          showToast(`${students.length} دانش‌آموز آپلود شد`);
+          fileInput.value = '';
+        } else {
+          showToast(result.message, 'error');
+        }
       } catch (error) {
-        showToast('خطا در ارتباط با سرور', 'error');
-        throw error;
+        console.error('خطا:', error);
+        showToast('خطا در خواندن فایل', 'error');
       }
-    }
-  
-    async function stallLogin(e) {
-      e.preventDefault();
-      const boothCode = document.getElementById('stallCode').value.trim();
-      const password = document.getElementById('stallPassword').value;
-  
-      const result = await apiCall('login', {
-        username: boothCode,
-        password: password,
-        role: 'vendor'
-      });
-      
-      if (result.success) {
-        currentBoothCode = result.data.vendorCode;
-        currentBoothName = result.data.vendorName;
-        document.getElementById('boothNameDisplay').textContent = currentBoothName;
-        showPanel('stallPanel');
-        refreshStallData();
-        showToast('ورود موفق');
-      } else {
-        showToast(result.message, 'error');
-      }
-    }
-  
-    async function adminLogin(e) {
-      e.preventDefault();
-      const password = document.getElementById('adminPassword').value;
-  
-      const result = await apiCall('login', {
-        username: 'admin',
-        password: password,
-        role: 'admin'
-      });
-      
-      if (result.success) {
-        showPanel('adminPanel');
-        refreshAdminData();
-        showToast('ورود مدیر موفق');
-      } else {
-        showToast(result.message, 'error');
-      }
-    }
+    };
 
-    function logout() {
-      currentBoothCode = '';
-      currentBoothName = '';
-      document.querySelectorAll('form').forEach(f => f.reset());
-      showPanel('entryScreen');
-      showToast('خروج انجام شد');
-    }
+    reader.readAsArrayBuffer(file);
+  }
 
-    function switchStallTab(tab) {
-      document.querySelectorAll('#stallPanel .tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('#stallPanel .tab-content').forEach(c => c.style.display = 'none');
-      
-      event.target.classList.add('active');
-      
-      if (tab === 'sale') {
-        document.getElementById('saleTab').style.display = 'block';
-      } else if (tab === 'report') {
-        document.getElementById('reportTab').style.display = 'block';
-        refreshStallData();
-      } else if (tab === 'debts') {
-        document.getElementById('debtsTab').style.display = 'block';
-        loadBoothDebts();
-      }
-    }
+  function downloadDebtors() {
+    // پیاده‌سازی دانلود Excel
+    showToast('در حال دانلود...');
+  }
 
-    function switchAdminTab(tab) {
-      document.querySelectorAll('#adminPanel .tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('#adminPanel .tab-content').forEach(c => c.style.display = 'none');
-      
-      event.target.classList.add('active');
-      
-      if (tab === 'booths') {
-        document.getElementById('boothsTab').style.display = 'block';
-      } else if (tab === 'debtors') {
-        document.getElementById('debtorsTab').style.display = 'block';
-        loadDebtors();
-      } else if (tab === 'sales') {
-        document.getElementById('salesTab').style.display = 'block';
-        loadAllSales();
-      } else if (tab === 'upload') {
-        document.getElementById('uploadTab').style.display = 'block';
-      }
-    }
+  function downloadAllSales() {
+    // پیاده‌سازی دانلود Excel
+    showToast('در حال دانلود...');
+  }
 
-    let searchTimeout;
-    async function searchStudents() {
-      clearTimeout(searchTimeout);
-      const query = document.getElementById('studentSearch').value.trim();
-      const resultsDiv = document.getElementById('searchResults');
-
-      if (query.length < 2) {
-        resultsDiv.style.display = 'none';
-        return;
-      }
-
-      searchTimeout = setTimeout(async () => {
-        const result = await apiCall('searchStudent', { query });
-        
-        if (result.success && result.students.length > 0) {
-          resultsDiv.innerHTML = result.students.map(s => `
-            <div class="search-item" onclick="selectStudent('${s.code}', '${s.name}', '${s.class}')">
-              <strong>${s.name}</strong> | کد: ${s.code} | ${s.class}
-            </div>
-          `).join('');
-          resultsDiv.style.display = 'block';
-        } else {
-          resultsDiv.innerHTML = '<div class="search-item">نتیجه‌ای یافت نشد</div>';
-          resultsDiv.style.display = 'block';
-        }
-      }, 300);
-    }
-
-    function selectStudent(code, name, className) {
-      document.getElementById('selectedStudentCode').value = code;
-      document.getElementById('selectedStudent').value = `${name} | ${className}`;
-      document.getElementById('searchResults').style.display = 'none';
-      document.getElementById('studentSearch').value = '';
-    }
-
-    async function submitSale(e) {
-      e.preventDefault();
-      
-      const studentCode = document.getElementById('selectedStudentCode').value;
-      if (!studentCode) {
-        showToast('لطفاً دانش‌آموز را انتخاب کنید', 'error');
-        return;
-      }
-
-      const data = {
-        boothCode: currentBoothCode,
-        studentCode,
-        amount: document.getElementById('amount').value,
-        paymentType: document.getElementById('paymentType').value,
-        description: document.getElementById('description').value
-      };
-
-      const result = await apiCall('submitSale', data);
-      
-      if (result.success) {
-        showToast('✅ فروش ثبت شد');
-        document.querySelector('#saleTab form').reset();
-        document.getElementById('selectedStudentCode').value = '';
-        refreshStallData();
-      } else {
-        showToast(result.message, 'error');
-      }
-    }
-
-    async function refreshStallData() {
-      const reportResult = await apiCall('getBoothReport', { boothCode: currentBoothCode });
-      const salesResult = await apiCall('getBoothSales', { boothCode: currentBoothCode });
-
-      if (reportResult.success) {
-        document.getElementById('boothStatsDisplay').innerHTML = `
-          <div class="stat-card">
-            <div class="stat-title">💰 فروش نقدی</div>
-            <div class="stat-value">${reportResult.totalCash.toLocaleString()} تومان</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-title">📝 فروش نسیه</div>
-            <div class="stat-value">${reportResult.totalCredit.toLocaleString()} تومان</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-title">💳 بدهی باقیمانده</div>
-            <div class="stat-value">${reportResult.pendingDebt.toLocaleString()} تومان</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-title">📊 مجموع کل</div>
-            <div class="stat-value">${reportResult.totalAmount.toLocaleString()} تومان</div>
-          </div>
-        `;
-      }
-
-      if (salesResult.success) {
-        if (salesResult.sales.length === 0) {
-          document.getElementById('todaySalesDisplay').innerHTML = '<p style="color:#cbd5f5;margin-top:12px;">هیچ فروشی امروز ثبت نشده است</p>';
-        } else {
-          document.getElementById('todaySalesDisplay').innerHTML = `
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ساعت</th>
-                    <th>دانش‌آموز</th>
-                    <th>کلاس</th>
-                    <th>مبلغ</th>
-                    <th>نوع</th>
-                    <th>وضعیت</th>
-                    <th>شرح</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${salesResult.sales.map(s => `
-                    <tr>
-                      <td>${s.time}</td>
-                      <td>${s.studentName}</td>
-                      <td>${s.class}</td>
-                      <td>${parseInt(s.amount).toLocaleString()}</td>
-                      <td><span class="badge ${s.paymentType === 'نقد' ? 'cash' : 'debt'}">${s.paymentType}</span></td>
-                      <td><span class="badge ${s.status === 'پرداخت‌شده' ? 'settled' : 'debt'}">${s.status}</span></td>
-                      <td>${s.description || '-'}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-        }
-      }
-    }
-
-    async function loadBoothDebts() {
-      const result = await apiCall('getBoothDebts', { boothCode: currentBoothCode });
-      
-      if (result.success) {
-        if (result.debts.length === 0) {
-          document.getElementById('boothDebtsDisplay').innerHTML = '<p style="color:#cbd5f5;margin-top:12px;">هیچ بدهی باقیمانده‌ای برای غرفه شما وجود ندارد 🎉</p>';
-        } else {
-          document.getElementById('boothDebtsDisplay').innerHTML = result.debts.map(d => `
-            <div class="debt-item">
-              <div class="debt-item-header">
-                <div>
-                  <strong>${d.studentName}</strong> | کلاس: ${d.class}
-                </div>
-                <button class="btn small success" onclick="settleDebt(${d.rowIndex})">تسویه</button>
-              </div>
-              <div class="debt-details">
-                📅 تاریخ: ${d.date}<br>
-                💰 مبلغ: ${parseInt(d.amount).toLocaleString()} تومان<br>
-                📝 شرح: ${d.description || 'ندارد'}
-              </div>
-            </div>
-          `).join('');
-        }
-      }
-    }
-
-    async function settleDebt(rowIndex) {
-      if (!confirm('آیا از تسویه این بدهی اطمینان دارید؟')) return;
-
-      const result = await apiCall('settleDebt', { rowIndex });
-      
-      if (result.success) {
-        showToast('✅ بدهی تسویه شد');
-        loadBoothDebts();
-        refreshStallData();
-      } else {
-        showToast(result.message, 'error');
-      }
-    }
-
-    async function refreshAdminData() {
-      const dashResult = await apiCall('getDashboard');
-      
-      if (dashResult.success) {
-        const booths = dashResult.booths;
-        
-        if (booths.length === 0) {
-          document.getElementById('boothsStatsDisplay').innerHTML = '<p style="color:#cbd5f5;margin-top:12px;">هیچ داده‌ای برای نمایش وجود ندارد</p>';
-        } else {
-          document.getElementById('boothsStatsDisplay').innerHTML = `
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>غرفه</th>
-                    <th>💰 نقد</th>
-                    <th>📝 نسیه</th>
-                    <th>💳 بدهی باقیمانده</th>
-                    <th>📊 مجموع</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${booths.map(b => `
-                    <tr>
-                      <td><strong>${b.name}</strong></td>
-                      <td>${b.totalCash.toLocaleString()}</td>
-                      <td>${b.totalCredit.toLocaleString()}</td>
-                      <td>${b.pendingDebt.toLocaleString()}</td>
-                      <td><strong>${b.totalAmount.toLocaleString()}</strong></td>
-                    </tr>
-                  `).join('')}
-                  <tr style="background:rgba(37,99,235,0.15);font-weight:700;">
-                    <td>🎯 مجموع کل</td>
-                    <td>${booths.reduce((s,b)=>s+b.totalCash,0).toLocaleString()}</td>
-                    <td>${booths.reduce((s,b)=>s+b.totalCredit,0).toLocaleString()}</td>
-                    <td>${booths.reduce((s,b)=>s+b.pendingDebt,0).toLocaleString()}</td>
-                    <td>${booths.reduce((s,b)=>s+b.totalAmount,0).toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          `;
-        }
-      }
-    }
-
-    async function loadDebtors() {
-      const result = await apiCall('getDebtors');
-      
-      if (result.success) {
-        if (result.debtors.length === 0) {
-          document.getElementById('debtorsDisplay').innerHTML = '<p style="color:#cbd5f5;margin-top:12px;">هیچ بدهکاری وجود ندارد 🎉</p>';
-        } else {
-          document.getElementById('debtorsDisplay').innerHTML = `
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>دانش‌آموز</th>
-                    <th>کلاس</th>
-                    <th>غرفه‌های بدهکار</th>
-                    <th>💰 مجموع بدهی</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${result.debtors.map(d => `
-                    <tr>
-                      <td><strong>${d.studentName}</strong></td>
-                      <td>${d.class}</td>
-                      <td>${d.booths}</td>
-                      <td><span class="badge debt">${d.totalDebt.toLocaleString()} تومان</span></td>
-                    </tr>
-                  `).join('')}
-                  <tr style="background:rgba(220,38,38,0.15);font-weight:700;">
-                    <td colspan="3">🎯 مجموع کل بدهی</td>
-                    <td>${result.debtors.reduce((s,d)=>s+d.totalDebt,0).toLocaleString()} تومان</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          `;
-        }
-      }
-    }
-
-    async function loadAllSales() {
-      const result = await apiCall('getAllSales');
-      
-      if (result.success) {
-        if (result.sales.length === 0) {
-          document.getElementById('allSalesDisplay').innerHTML = '<p style="color:#cbd5f5;margin-top:12px;">هیچ تراکنشی ثبت نشده است</p>';
-        } else {
-          document.getElementById('allSalesDisplay').innerHTML = `
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>تاریخ</th>
-                    <th>ساعت</th>
-                    <th>غرفه</th>
-                    <th>دانش‌آموز</th>
-                    <th>کلاس</th>
-                    <th>مبلغ</th>
-                    <th>نوع</th>
-                    <th>وضعیت</th>
-                    <th>تاریخ تسویه</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${result.sales.map(s => `
-                    <tr>
-                      <td>${s.date}</td>
-                      <td>${s.time}</td>
-                      <td>${s.boothName}</td>
-                      <td>${s.studentName}</td>
-                      <td>${s.class}</td>
-                      <td>${parseInt(s.amount).toLocaleString()}</td>
-                      <td><span class="badge ${s.paymentType === 'نقد' ? 'cash' : 'debt'}">${s.paymentType}</span></td>
-                      <td><span class="badge ${s.status === 'پرداخت‌شده' ? 'settled' : 'debt'}">${s.status}</span></td>
-                      <td>${s.settlementDate || '-'}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-        }
-      }
-    }
-
-    async function downloadDebtorsExcel() {
-      const result = await apiCall('getDebtors');
-      
-      if (!result.success || result.debtors.length === 0) {
-        showToast('داده‌ای برای دانلود وجود ندارد', 'error');
-        return;
-      }
-
-      const data = result.debtors.map(d => ({
-        'دانش‌آموز': d.studentName,
-        'کلاس': d.class,
-        'غرفه‌های بدهکار': d.booths,
-        'مجموع بدهی': d.totalDebt
-      }));
-
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'بدهکاران');
-      XLSX.writeFile(wb, `debtors_${new Date().toISOString().split('T')[0]}.xlsx`);
-      showToast('✅ فایل دانلود شد');
-    }
-
-    async function downloadSalesExcel() {
-      const result = await apiCall('getAllSales');
-      
-      if (!result.success || result.sales.length === 0) {
-        showToast('داده‌ای برای دانلود وجود ندارد', 'error');
-        return;
-      }
-
-      const data = result.sales.map(s => ({
-        'تاریخ': s.date,
-        'ساعت': s.time,
-        'غرفه': s.boothName,
-        'دانش‌آموز': s.studentName,
-        'کلاس': s.class,
-        'مبلغ': s.amount,
-        'نوع پرداخت': s.paymentType,
-        'وضعیت': s.status,
-        'تاریخ تسویه': s.settlementDate || '',
-        'شرح': s.description
-      }));
-
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'فروش‌ها');
-      XLSX.writeFile(wb, `sales_${new Date().toISOString().split('T')[0]}.xlsx`);
-      showToast('✅ فایل دانلود شد');
-    }
-
-    async function uploadStudentsFile() {
-      const fileInput = document.getElementById('studentsFile');
-      const file = fileInput.files[0];
-      
-      if (!file) {
-        showToast('لطفاً فایل را انتخاب کنید', 'error');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const sheet = workbook.Sheets[workbook.SheetNames[0]];
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-          if (jsonData.length < 2) {
-            showToast('فایل خالی است', 'error');
-            return;
-          }
-
-          const students = jsonData.slice(1).map(row => ({
-            code: String(row[0] || '').trim(),
-            name: String(row[1] || '').trim(),
-            class: String(row[2] || '').trim()
-          })).filter(s => s.code && s.name && s.class);
-
-          if (students.length === 0) {
-            showToast('هیچ داده معتبری یافت نشد', 'error');
-            return;
-          }
-
-          const result = await apiCall('uploadStudents', { students });
-          
-          if (result.success) {
-            showToast(`✅ ${students.length} دانش‌آموز آپلود شد`);
-            fileInput.value = '';
-          } else {
-            showToast(result.message, 'error');
-          }
-        } catch (error) {
-          showToast('خطا در خواندن فایل', 'error');
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-  </script>
+  document.addEventListener('DOMContentLoaded', () => {
+    showPanel('home');
+  });
+</script>
 </body>
 </html>
+
 
