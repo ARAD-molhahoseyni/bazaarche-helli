@@ -467,28 +467,31 @@
       }
     }
   
-    async function stallLogin(e) {
-      e.preventDefault();
-      const boothCode = document.getElementById('stallCode').value.trim();
-      const password = document.getElementById('stallPassword').value;
-  
-      const result = await apiCall('login', {
-        username: boothCode,
+    async function stallLogin() {
+      const username = document.getElementById('stall-username').value;
+      const password = document.getElementById('stall-password').value;
+      
+      const response = await apiCall('login', {
+        username: username,
         password: password,
         role: 'vendor'
       });
       
-      if (result.success) {
-        currentBoothCode = result.data.vendorCode;
-        currentBoothName = result.data.vendorName;
-        document.getElementById('boothNameDisplay').textContent = currentBoothName;
-        showPanel('stallPanel');
-        refreshStallData();
-        showToast('ورود موفق');
+      if (response.success) {
+        // ✅ حذف data
+        currentVendor = {
+          code: response.vendorCode,    // اصلاح شده
+          name: response.vendorName     // اصلاح شده
+        };
+        
+        showScreen('stall-panel');
+        updateVendorName();
+        loadBoothReport();
       } else {
-        showToast(result.message, 'error');
+        alert(response.message);
       }
-    }
+}
+
   
     async function adminLogin(e) {
       e.preventDefault();
@@ -950,6 +953,7 @@
   </script>
 </body>
 </html>
+
 
 
 
