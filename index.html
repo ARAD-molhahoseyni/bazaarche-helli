@@ -467,36 +467,43 @@
       }
     }
   
-    async function stallLogin() {
-      const username = document.getElementById('stall-username').value;
-      const password = document.getElementById('stall-password').value;
-      
-      const response = await apiCall('login', {
-        username: username,
-        password: password,
-        role: 'vendor'
-      });
-      
-      if (response.success) {
-        // ✅ حذف data
-        currentVendor = {
-          code: response.vendorCode,    // اصلاح شده
-          name: response.vendorName     // اصلاح شده
-        };
-        
-        showScreen('stall-panel');
-        updateVendorName();
-        loadBoothReport();
-      } else {
-        alert(response.message);
-      }
+    async function stallLogin(e) {
+  e.preventDefault();
+  
+  const username = document.getElementById('stallCode').value;
+  const password = document.getElementById('stallPassword').value;
+  
+  const response = await apiCall('login', {
+    username: username,
+    password: password,
+    role: 'vendor'
+  });
+  
+  if (response.success) {
+    // ذخیره اطلاعات غرفه
+    currentBoothCode = response.vendorCode;
+    currentBoothName = response.vendorName;
+    
+    // نمایش نام غرفه
+    document.getElementById('boothNameDisplay').textContent = currentBoothName;
+    
+    // نمایش پنل غرفه
+    showPanel('stallPanel');
+    
+    // بارگذاری گزارش
+    refreshStallData();
+    
+    showToast('ورود موفق');
+  } else {
+    showToast(response.message, 'error');
+  }
 }
 
   
     async function adminLogin(e) {
       e.preventDefault();
       const password = document.getElementById('adminPassword').value;
-  
+    
       const result = await apiCall('login', {
         username: 'admin',
         password: password,
@@ -953,6 +960,7 @@
   </script>
 </body>
 </html>
+
 
 
 
